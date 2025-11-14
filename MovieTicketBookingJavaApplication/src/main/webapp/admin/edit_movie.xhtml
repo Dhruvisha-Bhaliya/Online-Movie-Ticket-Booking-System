@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+       template="/WEB-INF/admin/Admin_panel.xhtml">
+    <h:head>
+        <title>Edit Movie</title>
+    </h:head>
+    <h:body>
+        <h1>Edit Movie Details</h1>
+        <h:form enctype="multipart/form-data">
+            <h:messages globalOnly="true" style="color:red" />
+		<h:inputHidden value="#{adminMovieController.movie.posterImagePath}" />
+            <h:panelGrid columns="2" cellpadding="5">
+                <h:outputLabel value="Movie Title:" />
+                <h:inputText value="#{adminMovieController.movie.movieTitle}" required="true"/>
+
+                <h:outputLabel value="Genre:" />
+                <h:inputText value="#{adminMovieController.movie.genre}" required="true"/>
+
+                <h:outputLabel value="Duration (min):" />
+                <h:inputText value="#{adminMovieController.movie.durationMin}" required="true"/>
+
+                <h:outputLabel value="Ticket Price:" />
+                <h:inputText value="#{adminMovieController.movie.ticketPrice}" required="true"/>
+
+                <h:outputLabel value="Languages:" />
+                <h:inputText value="#{adminMovieController.movie.languages}" />
+
+                <h:outputLabel value="Sub Genres:" />
+                <h:inputText value="#{adminMovieController.movie.subGenres}" />
+
+                <h:outputLabel value="Description:" />
+                <h:inputTextarea value="#{adminMovieController.movie.description}" cols="40" rows="5"/>
+
+                <h:outputLabel value="Cast - Crew:" />
+                <h:inputTextarea value="#{adminMovieController.movie.castCrew}" cols="40" rows="3"/>
+
+                <h:outputLabel value="Average Rating:" />
+                <h:inputText value="#{adminMovieController.movie.avgRating}" />
+
+                <h:outputLabel value="Vote Count:" />
+                <h:inputText value="#{adminMovieController.movie.voteCount}" />
+
+                <h:outputLabel value="Poster Image:" />
+                <h:panelGroup>
+                    <!-- Show existing image -->
+                    <h:graphicImage library="images" name="#{adminMovieController.movie.posterImagePath}" 
+                                    width="100" height="130" rendered="#{not empty adminMovieController.movie.posterImagePath}" />
+                    <br/>
+                    <!-- File upload to replace image -->
+                    <h:inputFile value="#{adminMovieController.uploadedFile}" />
+                </h:panelGroup>
+            </h:panelGrid>
+
+            <br/>
+            <h:commandButton value="Update Movie" action="#{adminMovieController.updateMovie}" />
+            <h:link outcome="admin_movies.xhtml" value="Cancel" />
+        </h:form>
+    </h:body>
+</html>

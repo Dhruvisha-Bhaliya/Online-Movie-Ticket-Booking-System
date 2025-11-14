@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html">
+    <h:head>
+        <title>Kantara - Movie Details</title>
+        <style>
+            /* New CSS file: detail.css */
+
+            /* Dark overlay hero section */
+            .detail-hero {
+                position: relative;
+                width: 100%;
+                height: 60vh; /* Adjust height as needed */
+                background-size: cover;
+                background-position: top center;
+                padding: 40px 0;
+                /* Dark overlay for text readability */
+                box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.6);
+                color: white;
+                margin-bottom: 30px;
+            }
+
+            .detail-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                gap: 40px;
+                align-items: flex-end; /* Align content to the bottom of the container */
+                padding: 0 30px;
+                position: relative;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .poster-small img {
+                width: 200px; /* Smaller poster size for the details page */
+                height: 290px;
+                object-fit: cover;
+                border-radius: 8px;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+                
+            }
+
+            .info {
+                flex-grow: 1;
+            }
+
+            .info h1 {
+                font-size: 3rem;
+                margin-bottom: 5px;
+            }
+
+            .languages {
+                font-size: 1.1rem;
+                color: #ccc;
+                margin-bottom: 20px;
+            }
+
+            .rating-info {
+                display: flex;
+                align-items: center;
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+
+            .rating-large {
+                font-weight: bold;
+                color: #38c172; /* Green for rating */
+                margin-right: 15px;
+            }
+
+            .votes-large {
+                color: #c0c0c0;
+                font-size: 1rem;
+            }
+
+            .pipe {
+                margin: 0 15px;
+                color: #999;
+            }
+
+            .genre-details {
+                font-size: 1rem;
+                color: #ddd;
+            }
+
+            .action-buttons {
+                margin-top: 30px;
+            }
+
+            .btn-booking {
+                background-color: #f84464; /* BookMyShow's signature button color */
+                color: white;
+                padding: 12px 30px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: bold;
+                display: inline-block;
+                transition: background-color 0.3s;
+            }
+
+            .btn-booking:hover {
+                background-color: #d1304d;
+            }
+
+            /* General Content Section */
+            .detail-section {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px 30px;
+            }
+
+            .detail-section h2 {
+                font-size: 24px;
+                color: #333;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+            }
+
+            .detail-section p {
+                color: #555;
+                line-height: 1.6;
+            }
+        </style>
+       
+    </h:head>
+    <h:body>
+        <div class="navbar">
+        </div>
+
+        <div class="detail-hero" style="background-image: url('#{resource[movie]}');">
+            <div class="detail-content">
+                <div class="poster-small">
+                    <img src="#{resource['images/kantara.jpg']}" alt="Kantara"/>
+                </div>
+                <div class="info">
+                    <h1>Kantara</h1>
+                    <p class="languages">Kannada | Hindi | Telugu | Tamil</p>
+                    <div class="rating-info">
+                        <span class="rating-large">⭐ 9.3/10</span>
+                        <span class="votes-large">408K+ Votes</span>
+                        <span class="pipe">|</span>
+                        <span class="genre-details">Adventure, Drama, Thriller | 2h 28m</span>
+                    </div>
+
+                    <div class="action-buttons">
+                        <h:link outcome="booking" styleClass="btn-booking">Book Tickets</h:link>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h2>About the movie</h2>
+            <p>The innocent who arrived, the divine forest whispers. A legend was born in 1847. When the lord and the king made a covenant, the people followed their lord and worshipped the local deity. The legend of Panjurli Daiva and Guliga Daiva is still alive, and the forest is protected by its people and its Gods.</p>
+        </div>
+
+        <div class="detail-section">
+            <h2>Cast - Crew</h2>
+            <p>Rishab Shetty (Director/Actor), Sapthami Gowda, Kishore, etc.</p>
+        </div>
+    </h:body>
+</html>

@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+     >
+    <h:head>
+        <title>Admin - Manage Movies</title>
+    </h:head>
+    <h:body>
+        <h1>Manage Movies</h1>
+
+        <h:form>
+            <h:link outcome="add_movie.xhtml" value="Add New Movie" />
+
+            <h:dataTable value="#{adminMovieController.movieList}" var="m" border="1"
+                         style="width:100%; text-align: center;">
+                <h:column>
+                    <f:facet name="header">Poster</f:facet>
+                    <h:graphicImage library="images" name="#{m.posterImagePath}" width="80" height="100" />
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Title</f:facet>
+                        #{m.movieTitle}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Genre</f:facet>
+                        #{m.genre}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Price</f:facet>
+                    ₹#{m.ticketPrice}
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <h:commandButton value="✏ Edit" action="#{adminMovieController.editMovie(m)}"  immediate="true"/>
+                    &nbsp;|&nbsp;
+                    <h:commandButton value="🗑 Delete" 
+                                     action="#{adminMovieController.deleteMovie(m.movieId)}"
+                                     onclick="return confirm('Are you sure you want to delete #{m.movieTitle}?');" 
+                                     immediate="true" />
+                </h:column>
+                </h:dataTable>
+        </h:form>
+        
+    </h:body>
+</html>

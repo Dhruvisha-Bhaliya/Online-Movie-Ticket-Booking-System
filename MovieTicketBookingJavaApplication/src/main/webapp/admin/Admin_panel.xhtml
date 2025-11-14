@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+    <h:head>
+       <title><ui:insert name="title">Admin Panel</ui:insert></title>
+    <h:outputStylesheet library="css" name="admin-style.css" />
+    
+    </h:head>
+    <h:body>
+       <div id="wrapper">
+        <!-- Sidebar -->
+        <aside id="sidebar-wrapper">
+            <div class="sidebar-heading">🎬 Theater Admin</div>
+
+            <nav class="list-group">
+                <h:link outcome="/admin/add_movie" styleClass="list-group-item">
+                    <i class="fa fa-film icon"></i> Manage Movies
+                </h:link>
+                <h:link outcome="/admin/admin_screens" styleClass="list-group-item">
+                    <i class="fa fa-tv icon"></i> Manage Screens
+                </h:link>
+                <h:link outcome="/admin/admin_theaters" styleClass="list-group-item">
+                    <i class="fa fa-building icon"></i> Manage Theaters
+                </h:link>
+                <h:link outcome="/admin/admin_shows" styleClass="list-group-item">
+                    <i class="fa fa-calendar-alt icon"></i> Manage Shows
+                </h:link>
+                <h:link outcome="/admin/admin_seats" styleClass="list-group-item">
+                    <i class="fa fa-chair icon"></i> Manage Seats
+                </h:link>
+               
+            </nav>
+        </aside>
+
+        <!-- Main Page -->
+        <main id="page-content-wrapper">
+            <header class="navbar">
+                <div class="navbar-title">
+                    <ui:insert name="title">Dashboard</ui:insert>
+                </div>
+                <div class="navbar-profile">
+                    <h:outputText value="Welcome, Admin" />
+                    <h:commandLink action="#{userBean.logout}">Logout</h:commandLink>
+                </div>
+            </header>
+
+            <section class="container-fluid">
+                <ui:insert name="content">
+                    <p>Welcome to the Theater Admin Dashboard.</p>
+                </ui:insert>
+            </section>
+
+            <footer>
+                <p>&copy; <h:outputText value="#{java.time.Year.now().getValue()}" /> Theater Admin Panel</p>
+            </footer>
+        </main>
+    </div>
+    </h:body>
+</html>

@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+       template="/WEB-INF/admin/Admin_panel.xhtml">
+    <h:head>
+        <title>Add Movie</title>
+        
+        <style>
+            /* Simple inline CSS for the form container */
+            .form-container {
+                width: 600px;
+                margin: 50px auto;
+                padding: 20px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .form-row {
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+            }
+            .form-row label {
+                width: 150px;
+                font-weight: bold;
+                display: inline-block;
+            }
+            .form-row .input-field {
+                flex-grow: 1;
+                padding: 8px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+            .form-row textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+            .button-group {
+                text-align: right;
+                margin-top: 20px;
+            }
+            .button-group .h-button {
+                padding: 10px 20px;
+                background-color: #e50914;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                text-decoration: none;
+            }
+        </style>
+    </h:head>
+    <h:body>
+        <div class="form-container">
+            <h:form enctype="multipart/form-data"> <h3>Add New Movie</h3>
+
+                <div class="form-row">
+                    <h:outputLabel value="Title:" for="title"/>
+                    <h:inputText id="title" value="#{adminMovieController.movie.movieTitle}" required="true" styleClass="input-field"/>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Main Genre:" for="genre"/>
+                    <h:inputText id="genre" value="#{adminMovieController.movie.genre}" required="true" styleClass="input-field"/>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Sub Genres (Comma Sep):" for="subgenre"/>
+                    <h:inputText id="subgenre" value="#{adminMovieController.movie.subGenres}" required="true" styleClass="input-field"/>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Duration (min):" for="duration"/>
+                    <h:inputText id="duration" value="#{adminMovieController.movie.durationMin}" required="true" styleClass="input-field">
+                        <f:convertNumber integerOnly="true"/>
+                    </h:inputText>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Rating (0.0 - 10.0):" for="rating"/>
+                    <h:inputText id="rating" value="#{adminMovieController.movie.avgRating}" required="true" styleClass="input-field">
+                        <f:convertNumber pattern="#0.0"/>
+                    </h:inputText>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Vote Count:" for="votes"/>
+                    <h:inputText id="votes" value="#{adminMovieController.movie.voteCount}" required="true" styleClass="input-field">
+                        <f:convertNumber integerOnly="true"/>
+                    </h:inputText>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Languages (Pipe Sep):" for="lang"/>
+                    <h:inputText id="lang" value="#{adminMovieController.movie.languages}" required="true" styleClass="input-field"/>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Cast/Crew Summary:" for="cast"/>
+                    <h:inputTextarea id="cast" value="#{adminMovieController.movie.castCrew}" required="true" styleClass="input-field"/>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Description:" for="desc"/>
+                    <h:inputTextarea id="desc" value="#{adminMovieController.movie.description}" required="true" styleClass="input-field"/>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Ticket Price:" for="price"/>
+                    <h:inputText id="price" value="#{adminMovieController.movie.ticketPrice}" required="true" styleClass="input-field">
+                        <f:convertNumber integerOnly="true"/>
+                    </h:inputText>
+                </div>
+
+                <div class="form-row">
+                    <h:outputLabel value="Poster Image File:" for="posterFile"/>
+                    <h:inputFile id="posterFile" value="#{adminMovieController.uploadedFile}" required="true"/>
+                </div>
+
+                <div class="button-group">
+                    <h:commandButton value="Add Movie" action="#{adminMovieController.addMovie}" styleClass="h-button"/>
+                    <h:link value="Back to Movies" outcome="admin_movies.xhtml" styleClass="h-button"/>
+                </div>
+            </h:form>
+        </div>
+    </h:body>
+</html>

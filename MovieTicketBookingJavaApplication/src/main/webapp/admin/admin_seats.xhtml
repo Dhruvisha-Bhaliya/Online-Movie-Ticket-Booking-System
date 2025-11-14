@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+       template="/WEB-INF/admin/Admin_panel.xhtml">
+
+    <h:head>
+        <title>Admin - Manage Seats</title>
+    </h:head>
+    <h:body>
+        <h2>Manage Seats</h2>
+
+        <h:form id="seatForm">
+            <h3>#{adminSeatController.editMode ? 'Edit Seat' : 'Add New Seat'}</h3>
+
+            <h:panelGrid columns="3">
+
+                <h:outputLabel value="Screen: " for="screen"/>
+                <h:selectOneMenu id="screen" value="#{adminSeatController.selectedScreenId}" required="true">
+                    <f:selectItem itemLabel="-- Select Screen --" itemValue="#{null}" noSelectionOption="true" />
+                    <f:selectItems value="#{adminSeatController.screenList}" var="screen" 
+                                   itemLabel="#{screen.screenName} (#{screen.theaterId.theaterName})" 
+                                   itemValue="#{screen.screenId}"/>
+                    <f:ajax event="change" render="seatTable" listener="#{adminSeatController.updateSeatsForScreen}" />
+                </h:selectOneMenu>
+                <h:message for="screen" style="color: red"/>
+
+                <h:outputLabel value="Seat Row (A, B, C...): " for="seatRow"/>
+                <h:inputText id="seatRow" value="#{adminSeatController.currentSeat.seatRow}" required="true" 
+                             converterMessage="Seat Row must be a single character." maxlength="1">
+                    <f:converter converterId="jakarta.faces.Character" />
+                </h:inputText>
+                <h:message for="seatRow" style="color: red"/>
+
+                <h:outputLabel value="Seat Number (1, 2, 3...): " for="seatNumber"/>
+                <h:inputText id="seatNumber" value="#{adminSeatController.currentSeat.seatNumber}" required="true">
+                    <f:convertNumber integerOnly="true" />
+                </h:inputText>
+                <h:message for="seatNumber" style="color: red"/>
+
+                <h:outputLabel value="Status: " for="status"/>
+                <h:selectOneMenu id="status" value="#{adminSeatController.currentSeat.seatStatus}" required="true">
+                    <f:selectItem itemLabel="-- Select Status --" itemValue="#{null}" noSelectionOption="true"/>
+                    <f:selectItem itemLabel="Available" itemValue="Available"/>
+                    <f:selectItem itemLabel="Booked" itemValue="Booked"/>
+                    <f:selectItem itemLabel="Under Maintainance" itemValue="Under Maintainance"/>
+                </h:selectOneMenu>
+                <h:message for="status" style="color: red"/>
+
+            </h:panelGrid>
+
+            <h:commandButton value="#{adminSeatController.editMode ? 'Update Seat' : 'Add Seat'}" 
+                             action="#{adminSeatController.saveSeat()}" />
+
+            <h:commandButton value="Clear" action="#{adminSeatController.resetForm()}" immediate="true" style="margin-left: 10px;">
+                <f:ajax render="@form :seatTable" />
+            </h:commandButton>
+        </h:form>
+
+        <hr/>
+
+        <h3>Seats per Screen</h3>
+
+        <h:form id="filterForm">
+            <h:panelGrid columns="2">
+                <h:outputLabel value="Filter by Screen: " for="filterScreen"/>
+                <h:selectOneMenu id="filterScreen" value="#{adminSeatController.selectedScreenId}">
+                    <f:selectItem itemLabel="-- Select Screen to View Seats --" itemValue="#{null}" noSelectionOption="true" />
+                    <f:selectItems value="#{adminSeatController.screenList}" var="screen" 
+                                   itemLabel="#{screen.screenName} (#{screen.theaterId.theaterName})" 
+                                   itemValue="#{screen.screenId}"/>
+                    <f:ajax event="change" render=":seatTable" />
+                </h:selectOneMenu>
+            </h:panelGrid>
+        </h:form>
+
+        <h:form id="seatTable">
+            <h:dataTable value="#{adminSeatController.seatsForSelectedScreen}" var="seat" 
+                         rendered="#{not empty adminSeatController.seatsForSelectedScreen}"
+                         border="1" cellpadding="5">
+                <f:facet name="header">Seat List for Selected Screen</f:facet>
+
+                <h:column><f:facet name="header">ID</f:facet>#{seat.seatId}</h:column>
+                <h:column><f:facet name="header">Screen</f:facet>#{seat.screenId.screenName}</h:column>
+                <h:column><f:facet name="header">Row</f:facet>#{seat.seatRow}</h:column>
+                <h:column><f:facet name="header">Number</f:facet>#{seat.seatNumber}</h:column>
+                <h:column><f:facet name="header">Status</f:facet>#{seat.seatStatus}</h:column>
+
+                <h:column>
+                    <f:facet name="header">Actions</f:facet>
+                    <h:commandLink value="Edit" action="#{adminSeatController.editSeat(seat)}" style="margin-right: 10px;">
+                        <f:ajax render=":seatForm" />
+                    </h:commandLink>
+                    <h:commandLink value="Delete" action="#{adminSeatController.deleteSeat(seat)}">
+                        <f:ajax render="@form" />
+                    </h:commandLink>
+                </h:column>
+            </h:dataTable>
+
+            <h:outputText value="Please select a screen to view seats." 
+                          rendered="#{empty adminSeatController.seatsForSelectedScreen and adminSeatController.selectedScreenId == null}" />
+            <h:outputText value="No seats found for this screen." 
+                          rendered="#{empty adminSeatController.seatsForSelectedScreen and adminSeatController.selectedScreenId != null}" />
+        </h:form>
+    </h:body>
+</html>

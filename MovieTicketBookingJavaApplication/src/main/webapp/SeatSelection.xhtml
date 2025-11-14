@@ -1,0 +1,173 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:c="jakarta.tags.core"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+       <title>Seat Selection - #{movieBookingController.selectedMovie.movieTitle}</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&amp;display=swap" rel="stylesheet" />
+        <style>
+            /* --- Seat Selection Styling --- */
+            body { 
+                font-family: 'Roboto', sans-serif; 
+                margin: 0; 
+                background-color: #f5f5f5; 
+            }
+            .container {
+                width: 70%;
+                max-width: 900px;
+                margin: 30px auto;
+                background: #fff;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+            h2 { color: #f84464; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
+            .show-details { font-size: 16px; margin-bottom: 20px; }
+            .screen {
+                text-align: center;
+                border-bottom: 3px solid #ccc;
+                margin-bottom: 30px;
+                padding: 10px;
+                font-weight: bold;
+                background-color: #eee;
+                color: #555;
+            }
+            .seat-map {
+                display: grid;
+                /* Adjust columns based on the max number of seats in a row */
+                grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)); 
+                gap: 8px;
+                margin-bottom: 30px;
+            }
+            .seat-row {
+                display: contents; /* Allows seats to span columns directly under the map grid */
+            }
+            .seat {
+                width: 30px;
+                height: 30px;
+                background-color: #e0e0e0;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 500;
+                color: #333;
+                cursor: pointer;
+                border: 1px solid #ccc;
+                transition: background-color 0.1s;
+            }
+            .seat.available:hover {
+                background-color: #c0f0c0;
+            }
+            .seat.booked {
+                background-color: #ffcccc; /* Red for booked */
+                cursor: not-allowed;
+                opacity: 0.7;
+            }
+            .seat.selected {
+                background-color: #4CAF50; /* Green for selected */
+                color: white;
+                border-color: #388e3c;
+            }
+            .seat-label {
+                grid-column: 1 / -1; /* Forces the label to span the entire row */
+                text-align: left;
+                font-weight: bold;
+                margin-top: 10px;
+                color: #777;
+                font-size: 14px;
+            }
+            
+            /* --- Summary Footer --- */
+            .summary-footer {
+                border-top: 1px solid #e0e0e0;
+                padding-top: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .total-amount {
+                font-size: 20px;
+                font-weight: bold;
+                color: #333;
+            }
+            .book-btn {
+                background-color: #f84464;
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            .book-btn:hover {
+                background-color: #e6004c;
+            }
+        </style>
+    </h:head>
+    <h:body>
+        <div class="container">
+            <h:messages showDetail="true" showSummary="false" style="color:red;"/>
+            
+            <h2>Seat Selection for: #{movieBookingController.selectedMovie.movieTitle}</h2>
+            
+            <div class="show-details">
+                **Theater:** #{movieBookingController.selectedShow.screenId.theaterId.theaterName} | 
+                **Time:** #{movieBookingController.formatTime(movieBookingController.selectedShow.showTime)} |
+                **Price per Seat:** ₹#{movieBookingController.selectedShow.basePrice}
+            </div>
+
+            <div class="screen">SCREEN THIS WAY</div>
+
+            <h:form id="seatForm">
+                <div class="seat-map">
+                    <c:set var="lastRow" value="" />
+                    <c:forEach items="#{movieBookingController.allSeats}" var="seat">
+                        
+                        <c:if test="#{seat.seatRow != lastRow}">
+                            <div class="seat-label">Row #{seat.seatRow}</div>
+                            <c:set var="lastRow" value="#{seat.seatRow}" />
+                        </c:if>
+                        
+                        <c:set var="isBooked" value="#{movieBookingController.isSeatBooked(seat.seatId)}" />
+                        <c:set var="isSelected" value="#{movieBookingController.isSeatSelected(seat)}" />
+                        
+                        <h:commandLink action="#{movieBookingController.toggleSeat(seat)}" 
+                                       rendered="#{!isBooked}" 
+                                       styleClass="seat available #{isSelected ? 'selected' : ''}">
+                            #{seat.seatNumber}
+                            <f:ajax render="@form:summary" />
+                        </h:commandLink>
+
+                        <h:outputText value="#{seat.seatNumber}" 
+                                      rendered="#{isBooked}" 
+                                      styleClass="seat booked" />
+                                      
+                    </c:forEach>
+                </div>
+                
+                <h:panelGroup id="summary">
+                    <div class="summary-footer">
+                        <h:panelGroup layout="block">
+                            <p>Seats Selected: 
+                                <strong>#{movieBookingController.selectedSeats.size()}</strong>
+                            </p>
+                            <div class="total-amount">
+                                Total Amount: ₹<h:outputText value="#{movieBookingController.totalAmount}" />
+                            </div>
+                        </h:panelGroup>
+
+                        <h:commandButton value="Pay &amp; Book Now" 
+                                         action="#{movieBookingController.completeBooking()}" 
+                                         styleClass="book-btn" 
+                                         disabled="#{movieBookingController.totalAmount == 0}" />
+                    </div>
+                </h:panelGroup>
+            </h:form>
+        </div>
+    </h:body>
+</html>

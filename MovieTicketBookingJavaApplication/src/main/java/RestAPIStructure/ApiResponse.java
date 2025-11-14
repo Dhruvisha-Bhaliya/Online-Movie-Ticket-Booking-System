@@ -1,0 +1,73 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package RestAPIStructure;
+
+/**
+ *
+ * @author DELL
+ */
+public class ApiResponse<T> {
+
+    private boolean status;
+    private int status_code;
+    private String message;
+    private T data;
+    private Object appSettings;
+
+    public ApiResponse() {
+    }
+
+    public ApiResponse(boolean status, int status_code, String message, T data) {
+        this.status = status;
+        this.status_code = status_code;
+        this.message = message;
+        this.data = data;
+    }
+
+    public ApiResponse(boolean status, int status_code, String message, T data, Object appSettings) {
+        this(status, status_code, message, data);
+        this.appSettings = appSettings;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public int getStatus_code() {
+        return status_code;
+    }
+
+    public void setStatus_code(int status_code) {
+        this.status_code = status_code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public Object getAppSettings() {
+        return appSettings;
+    }
+
+    public void setAppSettings(Object appSettings) {
+        this.appSettings = appSettings;
+    }
+}

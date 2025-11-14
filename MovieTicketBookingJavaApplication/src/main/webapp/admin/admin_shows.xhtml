@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+       template="/WEB-INF/admin/Admin_panel.xhtml">
+    <h:head>
+        <title>Admin - Manage Show</title>
+    </h:head>
+    <h:body>
+        <div class="container">
+            <h1>Show Management</h1>
+            <h:messages globalOnly="true" style="color: red;"/>
+
+            <div class="form-panel">
+                <h2>#{adminShowController.editMode ? 'Edit Show' : 'Add New Show'}</h2>
+                <h:form>
+                    <h:panelGrid columns="3" cellpadding="5">
+                        
+                        <h:outputLabel for="movie" value="Select Movie:" />
+                        <h:selectOneMenu id="movie" 
+                                         value="#{adminShowController.currentShow.movieId}" 
+                                         converter="#{movieConverter}" 
+                                         required="true" requiredMessage="Movie selection is required.">
+                            <f:selectItem itemLabel="--- Select Movie ---" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{adminShowController.movieList}" 
+                                           var="m" 
+                                           itemLabel="#{m.movieTitle}" 
+                                           itemValue="#{m}"/>
+                        </h:selectOneMenu>
+                        <h:message for="movie" style="color: red"/>
+
+                        <h:outputLabel for="screen" value="Select Screen:" />
+                        <h:selectOneMenu id="screen" 
+                                         value="#{adminShowController.currentShow.screenId}" 
+                                         converter="#{screenConverter}" 
+                                         required="true" requiredMessage="Screen selection is required.">
+                            <f:selectItem itemLabel="--- Select Screen ---" itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{adminShowController.screenList}" 
+                                           var="s" 
+                                           itemLabel="#{s.screenNumber} @ #{s.theaterId.theaterName} (#{s.theaterId.city})" 
+                                           itemValue="#{s}"/>
+                        </h:selectOneMenu>
+                        <h:message for="screen" style="color: red"/>
+                        
+                        <h:outputLabel for="time" value="Show Date/Time:" />
+                        <h:inputText id="time" 
+                                     value="#{adminShowController.currentShow.showTime}" 
+                                     required="true" requiredMessage="Show Time is required.">
+                            <f:convertDateTime pattern="yyyy-MM-dd HH:mm"/>
+                        </h:inputText>
+                        <h:message for="time" style="color: red"/>
+
+                        <h:outputLabel for="price" value="Base Price (₹):" />
+                        <h:inputText id="price" 
+                                     value="#{adminShowController.currentShow.basePrice}" 
+                                     required="true" requiredMessage="Base Price is required.">
+                             <f:convertNumber type="number" integerOnly="true"/>
+                        </h:inputText>
+                        <h:message for="price" style="color: red"/>
+                        
+                        <h:inputHidden value="#{adminShowController.currentShow.showId}" />
+                        
+                        <h:commandButton value="#{adminShowController.editMode ? 'Update Show' : 'Add Show'}" 
+                                         action="#{adminShowController.saveShow()}" />
+                        <h:commandButton value="Cancel/Reset" action="#{adminShowController.resetForm()}" immediate="true" />
+                        
+                    </h:panelGrid>
+                </h:form>
+            </div>
+
+            <h2>Existing Shows</h2>
+            <h:form>
+                <h:dataTable value="#{adminShowController.showList}" var="show">
+                    <h:column><f:facet name="header">ID</f:facet>#{show.showId}</h:column>
+                    <h:column><f:facet name="header">Movie</f:facet>#{show.movieId.movieTitle}</h:column>
+                    <h:column><f:facet name="header">Screen/Theater</f:facet>#{show.screenId.screenNumber} @ #{show.screenId.theaterId.theaterName}</h:column>
+                    <h:column><f:facet name="header">Time</f:facet>
+                        <h:outputText value="#{show.showTime}">
+                            <f:convertDateTime pattern="MMM dd, yyyy HH:mm"/>
+                        </h:outputText>
+                    </h:column>
+                    <h:column><f:facet name="header">Price</f:facet>₹#{show.basePrice}</h:column>
+                    
+                    <h:column>
+                        <f:facet name="header">Action</f:facet>
+                        <h:commandLink value="Edit" action="#{adminShowController.editShow(show)}" /> |
+                        <h:commandLink value="Delete" action="#{adminShowController.deleteShow(show)}" onclick="return confirm('Confirm delete?');" />
+                    </h:column>
+                </h:dataTable>
+            </h:form>
+        </div>
+    </h:body>
+</html>

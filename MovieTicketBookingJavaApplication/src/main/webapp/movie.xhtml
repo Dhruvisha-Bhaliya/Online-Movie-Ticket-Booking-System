@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title>All Movies - MovieBooker</title>
+        <style>
+            /* --- Page Layout --- */
+            .page-container {
+                display: flex;
+                max-width: 1200px; /* Max width for central alignment */
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+
+            .filter-sidebar {
+                width: 250px; /* Fixed width for the sidebar */
+                padding-right: 30px;
+                border-right: 1px solid #eee;
+                flex-shrink: 0; /* Prevents sidebar from shrinking */
+            }
+
+            .main-content {
+                flex-grow: 1; /* Takes up the remaining space */
+                padding-left: 30px;
+            }
+
+            .main-content h1 {
+                font-size: 28px;
+                color: #333;
+                margin-bottom: 25px;
+            }
+
+            /* --- Filter Styles --- */
+            .filter-group {
+                margin-bottom: 30px;
+            }
+
+            .filter-group h3 {
+                font-size: 18px;
+                color: #555;
+                margin-bottom: 15px;
+                font-weight: 600;
+            }
+
+            .filter-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .filter-tag {
+                display: block; /* Make it a block element to act like a button */
+                padding: 8px 15px;
+                border: 1px solid #ccc;
+                border-radius: 20px;
+                background-color: white;
+                color: #333;
+                text-decoration: none;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .filter-tag:hover {
+                background-color: #f0f0f0;
+                border-color: #aaa;
+            }
+
+            /* Style for selected tags (you can add logic in JSF to apply a 'selected' class) */
+            .filter-tag.selected {
+                background-color: #d1f2ff; /* Light blue background for active filter */
+                border-color: #007bff;
+                color: #007bff;
+                font-weight: bold;
+            }
+
+            .clear-tag {
+                color: #e74c3c;
+                border-color: #e74c3c;
+            }
+
+            /* --- Movie Grid Styles (from previous step, but ensure it works here) --- */
+            .movies-grid {
+                display: grid;
+                /* Adjust for 4 columns in the main content area */
+                grid-template-columns: repeat(4, 1fr);
+                gap: 30px;
+            }
+
+            /* Note: Ensure your existing .movie-card styles are included! */
+        </style>
+    </h:head>
+    <h:body>
+        <ui:include src=""/> <div class="page-container">
+
+            <div class="filter-sidebar">
+                <h2>Filters</h2>
+                <h:form id="filterForm">
+
+                    <div class="filter-group">
+                        <h3>Languages</h3>
+                        <div class="filter-tags">
+                            <ui:repeat value="#{moviePageController.uniqueLanguages}" var="lang">
+                                <h:commandLink action="#{moviePageController.applyFilters()}" 
+                                               styleClass="filter-tag #{lang eq moviePageController.selectedLanguage ? 'selected' : ''}"> <f:setPropertyActionListener value="#{lang}" target="#{moviePageController.selectedLanguage}" /> <h:outputText value="#{lang}" />
+                                    <f:ajax execute="@this" render="movieListPanel filterForm" /> </h:commandLink>
+                            </ui:repeat>
+                            <h:commandLink action="#{moviePageController.applyFilters()}" 
+                                           styleClass="filter-tag clear-tag #{empty moviePageController.selectedLanguage ? 'selected' : ''}">
+
+                                <f:setPropertyActionListener value="#{null}" target="#{moviePageController.selectedLanguage}" />
+                                <h:outputText value="Clear" />
+                                <f:ajax execute="@this" render="movieListPanel filterForm" />
+                            </h:commandLink>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="filter-group">
+                        <h3>Genres</h3>
+                        <div class="filter-tags">
+                            <ui:repeat value="#{moviePageController.uniqueGenres}" var="genre">
+                                <h:commandLink action="#{moviePageController.applyFilters()}" 
+                                               styleClass="filter-tag #{genre eq moviePageController.selectedGenre ? 'selected' : ''}"> <f:setPropertyActionListener value="#{genre}" target="#{moviePageController.selectedGenre}" /> <h:outputText value="#{genre}" />
+                                    <f:ajax execute="@this" render="movieListPanel filterForm" />
+                                </h:commandLink>
+                            </ui:repeat>
+                            <h:commandLink action="#{moviePageController.applyFilters()}" 
+                                           styleClass="filter-tag clear-tag #{empty moviePageController.selectedGenre ? 'selected' : ''}">
+
+                                <f:setPropertyActionListener value="#{null}" target="#{moviePageController.selectedGenre}" />
+                                <h:outputText value="Clear" />
+                                <f:ajax execute="@this" render="movieListPanel filterForm" />
+                            </h:commandLink>
+                        </div>
+                    </div>
+
+                </h:form>
+            </div>
+
+            <div class="main-content">
+                <h1>Movies in Your City</h1>
+
+                <h:panelGroup id="movieListPanel" layout="block">
+
+                    <div class="movies-grid">
+                        <ui:repeat value="#{moviePageController.filteredMovies}" var="m">
+                            <h:link outcome="MovieDetail" styleClass="movie-card-link">
+                                <f:param name="movieId" value="#{m.movieId}" />
+                                <div class="movie-card">
+                                    <div class="poster-container">
+                                        <h:graphicImage library="images" name="#{m.posterImagePath}" width="100%" height="auto"/>
+
+                                        <div class="rating-bar">
+                                            <span class="rating">⭐ #{m.avgRating}/10</span>
+                                        </div>
+                                    </div>
+                                    <div class="movie-details">
+                                        <h3>#{m.movieTitle}</h3>
+                                        <p>#{m.languages}</p> </div>
+                                </div>
+                            </h:link>
+                        </ui:repeat>
+                    </div>
+
+                    <h:panelGroup rendered="#{empty moviePageController.filteredMovies}">
+                        <p class="no-results">No movies found matching the selected filters.</p>
+                    </h:panelGroup>
+
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+        <h:outputScript library="js" name="script.js" />
+    </h:body>
+</html>

@@ -1,0 +1,107 @@
+/* ---------- BASE STYLES ---------- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* ---------- SIDEBAR ---------- */
+#sidebar-wrapper {
+    width: 200px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: #2c3e50;
+    padding-top: 20px;
+}
+
+.sidebar-heading {
+    text-align: center;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.list-group {
+    list-style: none;
+    padding: 0;
+}
+
+.list-group-item {
+    display: block;
+    padding: 10px 15px;
+    color: #ecf0f1;
+    text-decoration: none;
+}
+
+.list-group-item:hover {
+    background-color: #34495e;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+#page-content-wrapper {
+    margin-left: 200px;
+    padding: 20px;
+}
+
+/* ---------- HEADER ---------- */
+.navbar {
+    background-color: #fff;
+    padding: 10px 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- TABLES ---------- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+}
+
+.data-table th, .data-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #2980b9;
+    color: white;
+}
+
+.data-table tr:hover {
+    background-color: #ecf0f1;
+}
+
+/* ---------- BUTTONS ---------- */
+.button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.edit-btn { background-color: #27ae60; color: white; }
+.delete-btn { background-color: #c0392b; color: white; }
+.reset-btn { background-color: #7f8c8d; color: white; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    #page-content-wrapper {
+        margin-left: 0;
+    }
+}

@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title>Search Results</title>
+        <style>
+            /* --- Navbar Search Elements --- */
+
+            .navbar-right {
+                display: flex;
+                align-items: center; /* Vertically align items */
+                gap: 10px; /* Space between search box, button, and login */
+            }
+
+            .search-box {
+                padding: 8px 15px;
+                border: 1px solid #ccc;
+                border-radius: 20px; /* Rounded pill shape */
+                font-size: 14px;
+                width: 250px; /* Adjust width as needed */
+                transition: border-color 0.3s;
+            }
+
+            .search-box:focus {
+                border-color: #007bff; /* Highlight color on focus */
+                outline: none;
+            }
+
+            .search-button {
+                background-color: #007bff; /* Primary blue color */
+                color: white;
+                padding: 8px 15px;
+                border: none;
+                border-radius: 20px; /* Match search box radius */
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: bold;
+                transition: background-color 0.3s;
+            }
+
+            .search-button:hover {
+                background-color: #0056b3; /* Darker blue on hover */
+            }
+
+            .login-button {
+                /* Assuming this already exists, ensure it aligns well */
+                background-color: #28a745; /* Green for login, based on your image */
+                color: white;
+                padding: 8px 15px;
+                border-radius: 5px;
+                text-decoration: none; /* Important for h:link */
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            /* --- Search Results Page Layout --- */
+
+            .movies-section {
+                padding: 20px 40px; /* Padding for the main content area */
+            }
+
+            .movies-section h2 {
+                color: #333;
+                margin-bottom: 25px;
+                font-size: 24px;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 10px;
+            }
+
+            /* You already have .movies-grid and .movie-card styles, 
+               but ensure they are flexible for the search results page: */
+
+            .movies-grid {
+                display: grid;
+                /* Adjust grid columns for 5 items, allowing it to adapt */
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 30px;
+                justify-content: start;
+            }
+
+            .movie-card {
+                background-color: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                transition: transform 0.2s;
+            }
+
+            .movie-card:hover {
+                transform: translateY(-5px); /* Lift card on hover */
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            }
+
+            /* Style for when no results are found */
+            .movies-section p {
+                font-size: 18px;
+                color: #666;
+                margin-top: 30px;
+            }
+        </style>
+    </h:head>
+    <h:body>
+        <h:form>
+            <h:link outcome="home" value="← Back to Home" />
+        </h:form>
+
+        <h2>Search Results for "#{searchController.searchQuery}"</h2>
+
+        <h:panelGroup rendered="#{empty searchController.searchResults}">
+            <p>No movies found.</p>
+        </h:panelGroup>
+
+        <ui:repeat value="#{searchController.searchResults}" var="m">
+            <div class="movie-card">
+                <h:graphicImage library="images" name="#{m.posterImagePath}" width="150" height="220" />
+                <div>
+                    <h3>#{m.movieTitle}</h3>
+                    <p>#{m.genre}</p>
+                    <h:link outcome="MovieDetail">
+                        <f:param name="movieId" value="#{m.movieId}" />
+                        <h:outputText value="View Details" />
+                    </h:link>
+                </div>
+            </div>
+        </ui:repeat>
+        
+    </h:body>
+</html>

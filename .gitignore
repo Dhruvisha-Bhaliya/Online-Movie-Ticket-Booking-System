@@ -1,0 +1,14 @@
+*/target/
+*/build/
+
+
+# Ignore NetBeans config in any project
+**/nb-configuration.xml
+
+# Ignore persistence and beans config
+**/src/main/resources/META-INF/persistence.xml
+**/src/main/webapp/WEB-INF/beans.xml
+
+# Ignore all images folders
+**/images/
+

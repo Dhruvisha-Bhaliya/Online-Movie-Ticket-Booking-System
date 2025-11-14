@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+    <h:head>
+        <title>Login</title>
+    </h:head>
+    <h:body>
+         <h:form>
+            <h:messages globalOnly="true" />
+
+            <h:outputLabel for="username" value="Username:" />
+            <h:inputText id="username" value="#{authSignupBean.username}" required="true" />
+
+            <h:outputLabel for="email" value="Email:" />
+            <h:inputText id="email" value="#{authSignupBean.email}" required="true" />
+
+            <h:outputLabel for="password" value="Password:" />
+            <h:inputSecret id="password" value="#{authSignupBean.password}" required="true" />
+
+            <h:outputLabel for="role" value="Select Role:" />
+            <h:selectOneMenu id="role" value="#{authSignupBean.selectedRoleId}">
+                <f:selectItem itemLabel="-- Select Role --" itemValue="#{null}" />
+                <f:selectItems value="#{authSignupBean.roleList}" var="r"
+                               itemValue="#{r.roleId}" itemLabel="#{r.role}" />
+            </h:selectOneMenu>
+
+
+            <h:commandButton value="login" action="#{authSignupBean.login()}" />
+            <h:outputText value="#{authSignupBean.message}" style="color:red;" />
+        </h:form>
+    </h:body>
+</html>

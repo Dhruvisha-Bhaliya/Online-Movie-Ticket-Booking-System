@@ -1,0 +1,176 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/WebServices/GenericResource.java to edit this template
+ */
+package RestAPI;
+
+import RestAPIStructure.ResponseFormatter;
+import RestAPIStructure.SecurityRoles;
+import entity.Showmovie;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.EJB;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import java.net.URI;
+import java.util.Date;
+import java.util.List;
+import user_bean.ShowBeanLocal;
+
+/**
+ * REST Web Service
+ *
+ * @author DELL
+ */
+@Path("/shows")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class ShowResource {
+
+    @EJB
+    private ShowBeanLocal showBean;
+
+    @Context
+    private UriInfo uriInfo;
+
+    // ✅ Anyone can view all shows
+    @GET
+    public Response getAll() {
+        try {
+            List<Showmovie> shows = showBean.findAllShows();
+            return ResponseFormatter.success(200, "Shows fetched successfully", shows);
+        } catch (Exception e) {
+            return ResponseFormatter.error(500, "Failed to fetch shows", e.getMessage());
+        }
+    }
+
+    // ✅ Get a specific show by ID
+    @GET
+    @Path("{id}")
+    public Response getById(@PathParam("id") Long id) {
+        Showmovie s = showBean.find(id);
+        if (s == null)
+            return ResponseFormatter.error(404, "Show not found", null);
+
+        return ResponseFormatter.success(200, "Show fetched successfully", s);
+    }
+
+    // ✅ Only ADMIN, SUPER_ADMIN, MANAGER, STAFF can add a new show
+    @POST
+    @RolesAllowed({
+        SecurityRoles.ADMIN,
+        SecurityRoles.SUPER_ADMIN,
+        SecurityRoles.MANAGER,
+        SecurityRoles.STAFF
+    })
+    public Response create(Showmovie show) {
+        try {
+            showBean.createShow(show);
+            URI created = uriInfo.getAbsolutePathBuilder()
+                    .path(String.valueOf(show.getShowId()))
+                    .build();
+            return Response.created(created)
+                    .entity(ResponseFormatter.success(201, "Show created successfully", show))
+                    .build();
+        } catch (Exception e) {
+            return ResponseFormatter.error(400, "Failed to create show", e.getMessage());
+        }
+    }
+
+    // ✅ Update existing show — only ADMIN, SUPER_ADMIN, MANAGER
+    @PUT
+    @Path("{id}")
+    @RolesAllowed({
+        SecurityRoles.ADMIN,
+        SecurityRoles.SUPER_ADMIN,
+        SecurityRoles.MANAGER
+    })
+    public Response update(@PathParam("id") Long id, Showmovie updated) {
+        Showmovie existing = showBean.find(id);
+        if (existing == null) {
+            return ResponseFormatter.error(404, "Show not found", null);
+        }
+
+        try {
+            updated.setShowId(id);
+            showBean.editShow(updated);
+            return ResponseFormatter.success(200, "Show updated successfully", updated);
+        } catch (Exception e) {
+            return ResponseFormatter.error(400, "Failed to update show", e.getMessage());
+        }
+    }
+
+    // ✅ Delete a show — only ADMIN or SUPER_ADMIN
+    @DELETE
+    @Path("{id}")
+    @RolesAllowed({
+        SecurityRoles.ADMIN,
+        SecurityRoles.SUPER_ADMIN
+    })
+    public Response delete(@PathParam("id") Long id) {
+        Showmovie existing = showBean.find(id);
+        if (existing == null) {
+            return ResponseFormatter.error(404, "Show not found", null);
+        }
+
+        try {
+            showBean.removeShow(existing);
+            return ResponseFormatter.success(200, "Show deleted successfully", null);
+        } catch (Exception e) {
+            return ResponseFormatter.error(400, "Failed to delete show", e.getMessage());
+        }
+    }
+
+    // ✅ Get shows by Movie ID (public access)
+    @GET
+    @Path("/movie/{movieId}")
+    public Response getShowsByMovie(@PathParam("movieId") Long movieId) {
+        try {
+            List<Showmovie> shows = showBean.findShowByMovieId(movieId);
+            return ResponseFormatter.success(200, "Shows fetched by movie successfully", shows);
+        } catch (Exception e) {
+            return ResponseFormatter.error(500, "Failed to fetch shows by movie", e.getMessage());
+        }
+    }
+
+    // ✅ Get available show dates by movie
+    @GET
+    @Path("/movie/{movieId}/dates")
+    public Response getAvailableDates(@PathParam("movieId") Long movieId) {
+        try {
+            List<Date> dates = showBean.findAvailableDates(movieId);
+            return ResponseFormatter.success(200, "Available dates fetched successfully", dates);
+        } catch (Exception e) {
+            return ResponseFormatter.error(500, "Failed to fetch available dates", e.getMessage());
+        }
+    }
+
+    // ✅ Get shows by movie, date, and language (for filtering)
+    @GET
+    @Path("/movie/{movieId}/filter")
+    public Response getShowsByMovieDateLanguage(
+            @PathParam("movieId") Long movieId,
+            @QueryParam("date") Date date,
+            @QueryParam("language") String language) {
+        try {
+            if (date == null || language == null || language.isEmpty()) {
+                return ResponseFormatter.error(400, "Missing 'date' or 'language' query parameters", null);
+            }
+
+            List<Showmovie> shows = showBean.findShowsByMovieDateAndLanguage(movieId, date, language);
+            return ResponseFormatter.success(200, "Filtered shows fetched successfully", shows);
+        } catch (Exception e) {
+            return ResponseFormatter.error(500, "Failed to fetch filtered shows", e.getMessage());
+        }
+    }
+}

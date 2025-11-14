@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="jakarta.faces.core">
+
+    <h:head>
+        <title>Movie Ticket Booking System</title>
+        <h:outputStylesheet library="css" name="styles.css" />
+
+    </h:head>
+    <h:body>
+        <div class="navbar">
+            <div class="navbar-left">
+                <div class="navbar-title">🎬 MovieBooker</div>
+
+                <h:link outcome="movie" styleClass="navbar-link">
+                    <h:outputText value="Movie" />
+                </h:link>
+
+                <h:link outcome="about" styleClass="navbar-link">
+                    <h:outputText value="About" />
+                </h:link>
+            </div>
+
+            <div class="navbar-right">
+                <h:form id="searchForm">
+                    <!-- Search input with AJAX to show live suggestions -->
+                    <h:inputText id="searchBox" styleClass="search-box"
+                                 value="#{searchController.searchQuery}"
+                                
+                                 onkeyup="jsf.ajax.request(this, event, {execute: 'searchBox', render: 'suggestions'});" 
+                                 />
+
+                    <!-- Suggestions dropdown -->
+                    <h:panelGroup id="suggestions" layout="block" styleClass="suggestion-box"
+                                  rendered="#{not empty searchController.filteredMovies}">
+                        <ui:repeat value="#{searchController.filteredMovies}" var="movie">
+                            <div class="suggestion-item"
+                                 onclick="window.location.href = 'MovieDetail.xhtml?movieId=#{movie.movieId}'">
+                                🎬 #{movie.movieTitle}
+                            </div>
+                        </ui:repeat>
+                    </h:panelGroup>
+
+                    <!-- Normal search button (redirects to detail if exact match) -->
+                    <h:commandButton value="Search"
+                                     styleClass="search-button"
+                                     action="#{searchController.performSearch()}" />
+                </h:form>
+
+
+                <h:link outcome="login" styleClass="login-button">
+                    <h:outputText value="Login" />
+                </h:link>
+            </div>
+
+        </div>
+
+        <!--        <div style="padding: 20px;">
+                    <h2>Welcome to the Movie Booking System!</h2>
+                    <p>This is where the main content (e.g., list of movies) will go.</p>
+                </div>-->
+        <!-- 🔁 Image Slider Section -->
+        <div class="hero-slider">
+            <ui:repeat value="#{adminMovieController.movieList}" var="m" begin="0" end="1" varStatus="loop">
+                <div class="slide #{loop.index == 0 ? 'active' : ''}" 
+                     style="background-image: url('#{resource['images/' += m.posterImagePath]}');">
+
+                    <div class="slide-content">
+                        <h2>#{m.movieTitle}</h2>
+                        <p>#{m.genre}</p> 
+                        <p class="tag">#1 on Trend</p> 
+                        <div class="buttons">
+                            <h:link outcome="MovieDetail" styleClass="btn-secondary">
+                                <f:param name="movieId" value="#{m.movieId}" />
+                                <h:outputText value="Watch Now" />
+                            </h:link>
+                            <button class="btn-secondary">View Trailer</button>
+                        </div>
+                    </div>
+                </div>
+            </ui:repeat>
+
+
+
+            <div class="dots">
+                <ui:repeat value="#{adminMovieController.movieList}" var="m" begin="0" end="1" varStatus="loop">
+                    <span class="dot #{loop.index == 0 ? 'active' : ''}"></span>
+                </ui:repeat>
+            </div>
+        </div>
+
+        <!-- 🎬 Recommended Movies Section -->
+        <div class="movies-section">
+            <h2>Recommended Movies</h2>
+            <div class="movies-grid">
+                <!-- Dynamic movie loop -->
+                <ui:repeat value="#{adminMovieController.movieList}" var="m">
+                    <h:link outcome="MovieDetail" styleClass="movie-card-link">
+                        <f:param name="movieId" value="#{m.movieId}" />
+                        <div class="movie-card">
+                            <div class="poster-container">
+
+                                <h:graphicImage library="images" name="#{m.posterImagePath}" width="150" height="220"/>
+
+                                <div class="rating-bar">
+                                    <span class="rating">⭐ #{m.avgRating}/10</span>
+                                    <span class="votes">#{m.voteCount}+ Votes</span>
+                                </div>
+                            </div>
+
+                            <div class="movie-details">
+                                <h3>#{m.movieTitle}</h3>
+                                <p>#{m.genre}</p>
+                            </div>
+                        </div>
+                    </h:link>
+
+                </ui:repeat>
+
+            </div>
+        </div>
+
+        <h:outputScript library="js" name="script.js" />
+    </h:body>
+</html>
