@@ -11,6 +11,7 @@ import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import user_bean.ScreenBeanLocal;
 import user_bean.TheaterBeanLocal;
@@ -47,13 +48,19 @@ public class AdminScreenController implements Serializable {
 
     // --- Action Methods ---
     public String saveScreen() {
-        if (editMode) {
-            screenBean.editScreen(currentScreen);
-        } else {
-            screenBean.createScreen(currentScreen);
+
+        if (currentScreen.getStatus() == null) {
+            currentScreen.setStatus("ACTIVE");
         }
 
-        // Reset state
+        currentScreen.setUpdatedAt(new Date());
+
+        if (!editMode) {
+            currentScreen.setCreatedAt(new Date());
+            screenBean.createScreen(currentScreen);
+        } else {
+            screenBean.editScreen(currentScreen);
+        }
         currentScreen = new Screen();
         editMode = false;
         loadData();

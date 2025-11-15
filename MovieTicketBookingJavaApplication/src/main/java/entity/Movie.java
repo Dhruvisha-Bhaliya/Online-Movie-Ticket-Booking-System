@@ -16,6 +16,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -311,6 +313,18 @@ public class Movie implements Serializable {
     @Override
     public String toString() {
         return "entity.Movie[ movieId=" + movieId + " ]";
+    }
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+        this.status = "ACTIVE";   // ✔️ String, not enum
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = new Date();
     }
 
 }

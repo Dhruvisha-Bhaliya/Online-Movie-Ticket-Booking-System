@@ -12,6 +12,7 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import user_bean.ScreenBeanLocal;
 import user_bean.SeatBeanLocal;
@@ -63,18 +64,31 @@ public class AdminSeatController implements Serializable {
 
     // --- CRUD Action Methods ---
     public String saveSeat() {
-        Screen selectedScreen = screenBean.findScreen(selectedScreenId);
-        currentSeat.setScreenId(selectedScreen); // Set the foreign key
 
+        // 1. Load the selected screen (foreign key)
+        Screen selectedScreen = screenBean.findScreen(selectedScreenId);
+        currentSeat.setScreenId(selectedScreen);
+
+        // 2. If status is null, set default
+        if (currentSeat.getStatus() == null || currentSeat.getStatus().isEmpty()) {
+            currentSeat.setStatus("ACTIVE");
+        }
+
+        // 3. Handle create vs update
         if (editMode) {
+            currentSeat.setUpdatedAt(new Date());
             seatBean.editSeat(currentSeat);
         } else {
+            Date now = new Date();
+            currentSeat.setCreatedAt(now);
+            currentSeat.setUpdatedAt(now);
             seatBean.createSeat(currentSeat);
         }
 
-        resetForm(); // Reset for next add/edit
-        updateSeatsForScreen(); // Refresh the displayed list
-        loadSeatList(); // Keep the main list updated for general purposes
+        // 4. UI Refresh
+        resetForm();
+        updateSeatsForScreen();
+        loadSeatList();
 
         return "admin_seats?faces-redirect=true";
     }

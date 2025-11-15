@@ -12,6 +12,7 @@ import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import user_bean.MovieBeanLocal;
 import user_bean.ScreenBeanLocal;
@@ -24,9 +25,13 @@ import user_bean.ShowBeanLocal;
 @Named("adminShowController")
 @SessionScoped
 public class AdminShowController implements Serializable {
-    @EJB private ShowBeanLocal showBean;
-    @EJB private MovieBeanLocal movieBean; 
-    @EJB private ScreenBeanLocal screenBean; 
+
+    @EJB
+    private ShowBeanLocal showBean;
+    @EJB
+    private MovieBeanLocal movieBean;
+    @EJB
+    private ScreenBeanLocal screenBean;
 
     private Showmovie currentShow;
     private List<Showmovie> showList;
@@ -42,20 +47,30 @@ public class AdminShowController implements Serializable {
 
     private void loadData() {
         showList = showBean.findAllShows();
-        movieList = movieBean.getAllMovies(); 
+        movieList = movieBean.getAllMovies();
         screenList = screenBean.findAllScreen();
     }
-    
+
     // --- CRUD Action Methods (Standard pattern) ---
     public String saveShow() {
+
+        if (!editMode) {
+            currentShow.setCreatedAt(new Date());
+            currentShow.setStatus("ACTIVE");
+        }
+
+        currentShow.setUpdatedAt(new Date());
+
         if (editMode) {
             showBean.editShow(currentShow);
         } else {
             showBean.createShow(currentShow);
         }
+
         currentShow = new Showmovie();
         editMode = false;
         loadData();
+
         return "admin_shows?faces-redirect=true";
     }
 
@@ -75,10 +90,27 @@ public class AdminShowController implements Serializable {
     }
 
     // --- Getters and Setters ---
-    public Showmovie getCurrentShow() { return currentShow; }
-    public void setCurrentShow(Showmovie currentShow) { this.currentShow = currentShow; }
-    public List<Showmovie> getShowList() {  return showList; }
-    public List<Movie> getMovieList() { return movieList; }
-    public List<Screen> getScreenList() { return screenList; }
-    public boolean isEditMode() { return editMode; }
+    public Showmovie getCurrentShow() {
+        return currentShow;
+    }
+
+    public void setCurrentShow(Showmovie currentShow) {
+        this.currentShow = currentShow;
+    }
+
+    public List<Showmovie> getShowList() {
+        return showList;
+    }
+
+    public List<Movie> getMovieList() {
+        return movieList;
+    }
+
+    public List<Screen> getScreenList() {
+        return screenList;
+    }
+
+    public boolean isEditMode() {
+        return editMode;
+    }
 }

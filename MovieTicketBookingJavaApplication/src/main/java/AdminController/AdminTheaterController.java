@@ -10,6 +10,7 @@ import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import user_bean.TheaterBeanLocal;
 
@@ -19,7 +20,8 @@ import user_bean.TheaterBeanLocal;
  */
 @Named("adminTheaterController") // <--- This name MUST EXACTLY MATCH the name in the XHTML
 @SessionScoped
-public class AdminTheaterController implements Serializable{
+public class AdminTheaterController implements Serializable {
+
     @EJB
     private TheaterBeanLocal theaterBean;
 
@@ -36,7 +38,7 @@ public class AdminTheaterController implements Serializable{
     private void loadTheaters() {
         theaterList = theaterBean.findallTheater();
     }
-    
+
     // --- Getters and Setters ---
     public Theater getCurrentTheater() {
         return currentTheater;
@@ -48,29 +50,37 @@ public class AdminTheaterController implements Serializable{
 
     public List<Theater> getTheaterList() {
         // Reload list only if null or forced (for simplicity, we reload on every call)
-        loadTheaters(); 
+        loadTheaters();
         return theaterList;
     }
-    
+
     public boolean isEditMode() {
         return editMode;
     }
     // ---------------------------
-    
 
     // --- Action Methods ---
-
     public String saveTheater() {
+
+        Date now = new Date();
+
+        if (!editMode) {
+            currentTheater.setCreatedAt(now);
+            currentTheater.setStatus("ACTIVE");
+        }
+
+        currentTheater.setUpdatedAt(now);
+
         if (editMode) {
             theaterBean.editTheater(currentTheater);
         } else {
             theaterBean.createTheater(currentTheater);
         }
-        
-        // Reset state
+
         currentTheater = new Theater();
         editMode = false;
         loadTheaters();
+
         return "admin_theaters?faces-redirect=true";
     }
 
