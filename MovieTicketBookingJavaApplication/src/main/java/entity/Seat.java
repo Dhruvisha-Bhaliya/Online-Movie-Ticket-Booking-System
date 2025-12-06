@@ -79,7 +79,6 @@ public class Seat implements Serializable {
     private Collection<Booking> bookingCollection;
     @JoinColumn(name = "screen_id", referencedColumnName = "screen_id")
     @ManyToOne(optional = false)
-    @JsonbTransient
     private Screen screenId;
 
     public Seat() {

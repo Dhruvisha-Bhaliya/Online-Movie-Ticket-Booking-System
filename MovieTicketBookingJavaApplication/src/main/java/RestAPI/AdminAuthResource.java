@@ -7,7 +7,10 @@ package RestAPI;
 import AuthServiceAPI.AuthServiceAPI;
 import RestAPIStructure.ResponseFormatter;
 import entity.Admin;
+import jakarta.ejb.EJB;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Map;
@@ -22,35 +25,62 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class AdminAuthResource {
 
+    @EJB
     private AuthServiceAPI authService;
 
-    @POST
-    @Path("/register")
-    public Response register(Admin admin) {
-        try {
-            var apiResponse = authService.registerAdmin(admin);
-            return ResponseFormatter.success(
-                    apiResponse.getStatus_code(),
-                    apiResponse.getMessage(),
-                    apiResponse.getData()
-            );
-        } catch (Exception e) {
-            return ResponseFormatter.error(500, "Admin registration failed", e.getMessage());
+    // Helper method to consolidate success/error response formatting
+    private Response respond(RestAPIStructure.ApiResponse<?> apiResponse) {
+        if (apiResponse.isStatus()) {
+            return ResponseFormatter.success(apiResponse.getStatus_code(), apiResponse.getMessage(), apiResponse.getData());
+        } else {
+            return ResponseFormatter.error(apiResponse.getStatus_code(), apiResponse.getMessage(), null);
         }
     }
 
+    // C - Register New Admin (Hierarchical Creation)
+    // The creator's role is checked inside AuthServiceAPI via the Authorization header
+    @POST
+    @Path("/register")
+    public Response register(@Context HttpHeaders headers, Admin admin) {
+        String authHeader = headers.getHeaderString("Authorization");
+        var apiResponse = authService.registerAdmin(admin, authHeader);
+        return respond(apiResponse);
+    }
+
+    // R - Login Admin
     @POST
     @Path("/login")
     public Response login(Map<String, String> loginData) {
-        try {
-            var apiResponse = authService.loginAdmin(loginData.get("email"), loginData.get("password"));
-            return ResponseFormatter.success(
-                    apiResponse.getStatus_code(),
-                    apiResponse.getMessage(),
-                    apiResponse.getData()
-            );
-        } catch (Exception e) {
-            return ResponseFormatter.error(500, "Admin login failed", e.getMessage());
-        }
+        var apiResponse = authService.loginAdmin(loginData.get("email"), loginData.get("password"));
+        return respond(apiResponse);
+    }
+
+    // U - Update Admin Profile (Requires Authentication)
+    @PUT
+    @Path("/profile")
+    public Response updateProfile(Admin updatedAdmin, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString("Authorization");
+        var apiResponse = authService.updateAdminProfile(updatedAdmin, authHeader);
+        return respond(apiResponse);
+    }
+
+    // U - Update Admin Password (Requires Authentication)
+    @PUT
+    @Path("/updatePassword")
+    public Response updatePassword(Map<String, String> requestBody, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString("Authorization");
+        String oldPassword = requestBody.get("oldPassword");
+        String newPassword = requestBody.get("newPassword");
+        var apiResponse = authService.updateAdminPassword(oldPassword, newPassword, authHeader);
+        return respond(apiResponse);
+    }
+
+    // D - Deactivate/Delete Admin Account (Requires Authentication)
+    @DELETE
+    @Path("/delete")
+    public Response deleteAccount(@Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString("Authorization");
+        var apiResponse = authService.deleteAdmin(authHeader);
+        return respond(apiResponse);
     }
 }

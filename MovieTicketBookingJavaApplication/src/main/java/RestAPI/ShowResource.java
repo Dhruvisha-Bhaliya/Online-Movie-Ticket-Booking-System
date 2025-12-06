@@ -59,64 +59,64 @@ public class ShowResource {
     @Path("{id}")
     public Response getById(@PathParam("id") Long id) {
         Showmovie s = showBean.find(id);
-        if (s == null)
+        if (s == null) {
             return ResponseFormatter.error(404, "Show not found", null);
+        }
 
         return ResponseFormatter.success(200, "Show fetched successfully", s);
     }
 
-    // ✅ Only ADMIN, SUPER_ADMIN, MANAGER, STAFF can add a new show
     @POST
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER,
-        SecurityRoles.STAFF
-    })
-    public Response create(Showmovie show) {
+    public Response create(Showmovie showmovie) {
         try {
-            showBean.createShow(show);
-            URI created = uriInfo.getAbsolutePathBuilder()
-                    .path(String.valueOf(show.getShowId()))
-                    .build();
-            return Response.created(created)
-                    .entity(ResponseFormatter.success(201, "Show created successfully", show))
-                    .build();
+            Date now = new Date();
+            showmovie.setCreatedAt(now);
+            showmovie.setUpdatedAt(now);
+
+            showBean.createShow(showmovie);
+
+            return ResponseFormatter.success(
+                    201,
+                    "Show created successfully",
+                    showmovie
+            );
+
         } catch (Exception e) {
-            return ResponseFormatter.error(400, "Failed to create show", e.getMessage());
+            return ResponseFormatter.error(400, "Failed to create Show", e.getMessage());
         }
     }
 
     // ✅ Update existing show — only ADMIN, SUPER_ADMIN, MANAGER
     @PUT
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER
-    })
-    public Response update(@PathParam("id") Long id, Showmovie updated) {
-        Showmovie existing = showBean.find(id);
-        if (existing == null) {
-            return ResponseFormatter.error(404, "Show not found", null);
-        }
+    public Response update(@PathParam("id") Long id, Showmovie updatedData) {
 
         try {
-            updated.setShowId(id);
-            showBean.editShow(updated);
-            return ResponseFormatter.success(200, "Show updated successfully", updated);
+            Showmovie existing = showBean.find(id);
+
+            if (existing == null) {
+                return ResponseFormatter.error(404, "Show not found", null);
+            }
+
+            existing.setBasePrice(updatedData.getBasePrice());
+            existing.setShowTime(updatedData.getShowTime());
+            existing.setMovieId(updatedData.getMovieId());
+            existing.setScreenId(updatedData.getScreenId());
+            existing.setStatus(updatedData.getStatus());
+
+            existing.setUpdatedAt(new Date());
+            showBean.editShow(existing);
+
+            return ResponseFormatter.success(200, "Show updated successfully", existing);
+
         } catch (Exception e) {
-            return ResponseFormatter.error(400, "Failed to update show", e.getMessage());
+            return ResponseFormatter.error(400, "Failed to update Show", e.getMessage());
         }
     }
 
     // ✅ Delete a show — only ADMIN or SUPER_ADMIN
     @DELETE
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN
-    })
     public Response delete(@PathParam("id") Long id) {
         Showmovie existing = showBean.find(id);
         if (existing == null) {

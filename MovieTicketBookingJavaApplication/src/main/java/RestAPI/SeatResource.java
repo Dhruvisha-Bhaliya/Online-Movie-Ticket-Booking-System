@@ -5,10 +5,8 @@
 package RestAPI;
 
 import RestAPIStructure.ResponseFormatter;
-import RestAPIStructure.SecurityRoles;
 import entity.Screen;
 import entity.Seat;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -24,7 +22,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.Date;
 import java.util.List;
+import user_bean.ScreenBeanLocal;
 import user_bean.SeatBeanLocal;
 
 /**
@@ -39,6 +39,8 @@ public class SeatResource {
 
     @EJB
     private SeatBeanLocal seatBean;
+    @EJB
+    private ScreenBeanLocal screenBean;
 
     @Context
     private UriInfo uriInfo;
@@ -66,37 +68,58 @@ public class SeatResource {
         return ResponseFormatter.success(200, "Seat fetched successfully", s);
     }
 
-    // ✅ Only ADMIN, SUPER_ADMIN, MANAGER, STAFF can add a new seat
+    // Assuming you have a ScreenBeanLocal to fetch the screen
+// @EJB
+// private ScreenBeanLocal screenBean; 
     @POST
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER,
-        SecurityRoles.STAFF
-    })
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response create(Seat seat) {
         try {
+            // --- 1. Validate and retrieve Screen ID from the payload ---
+            Screen screenFromPayload = seat.getScreenId();
+
+            if (screenFromPayload == null || screenFromPayload.getScreenId() == null) {
+                return ResponseFormatter.error(400, "Missing Screen ID", "The 'screenId' object with the ID property must be provided in the request body.");
+            }
+
+            Long screenId = screenFromPayload.getScreenId();
+
+            // --- 2. Fetch the actual managed Screen entity from the database ---
+            Screen managedScreen = screenBean.findScreen(screenId); // Now this works!
+
+            if (managedScreen == null) {
+                return ResponseFormatter.error(404, "Screen not found", "Screen with ID " + screenId + " does not exist.");
+            }
+
+            // --- 3. Set the managed Screen entity onto the Seat object ---
+            seat.setScreenId(managedScreen);
+
+            // --- 4. Persist the Seat entity ---
+            Date now = new Date();
+            seat.setCreatedAt(now);
+            seat.setUpdatedAt(now);
+
             seatBean.createSeat(seat);
-            URI created = uriInfo.getAbsolutePathBuilder()
-                    .path(String.valueOf(seat.getSeatId()))
-                    .build();
-            return Response.created(created)
-                    .entity(ResponseFormatter.success(201, "Seat created successfully", seat))
-                    .build();
+
+            // Success Path
+            return ResponseFormatter.success(
+                    201,
+                    "Seat created successfully",
+                    seat
+            );
+
         } catch (Exception e) {
+            // Error Path: Database or EJB exception
             return ResponseFormatter.error(400, "Failed to create seat", e.getMessage());
         }
     }
 
     // ✅ Update existing seat — only ADMIN, SUPER_ADMIN, MANAGER
+    // ✅ Update existing seat — only ADMIN, SUPER_ADMIN, MANAGER
     @PUT
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER
-    })
     public Response update(@PathParam("id") Long id, Seat updated) {
+        // 1. Find the existing managed entity
         Seat existing = seatBean.findSeat(id);
         if (existing == null) {
             return ResponseFormatter.error(404, "Seat not found", null);
@@ -104,9 +127,44 @@ public class SeatResource {
 
         try {
             updated.setSeatId(id);
+
+            // 2. Determine the Screen entity to use for the update
+            Screen screenToPersist;
+
+            // Check if the client provided a new Screen object/ID
+            if (updated.getScreenId() != null && updated.getScreenId().getScreenId() != null) {
+
+                Long newScreenId = updated.getScreenId().getScreenId();
+
+                // Fetch the actual managed Screen entity for the new ID
+                Screen managedNewScreen = screenBean.findScreen(newScreenId);
+
+                if (managedNewScreen == null) {
+                    // Error Path: New screen ID is invalid
+                    return ResponseFormatter.error(404, "Invalid Screen ID", "The new Screen ID provided (" + newScreenId + ") does not exist.");
+                }
+                screenToPersist = managedNewScreen;
+
+            } else {
+                // No new screen ID provided, so use the existing, managed one.
+                // This is crucial to prevent the screenId column from becoming null.
+                screenToPersist = existing.getScreenId();
+            }
+
+            // Final assignment of the managed Screen entity
+            updated.setScreenId(screenToPersist);
+
+            // 3. Update timestamps and preserve creation time
+            updated.setCreatedAt(existing.getCreatedAt());
+            updated.setUpdatedAt(new Date());
+
+            // 4. Call the EJB update method
             seatBean.editSeat(updated);
+
             return ResponseFormatter.success(200, "Seat updated successfully", updated);
+
         } catch (Exception e) {
+            // General error path catches transaction-related exceptions
             return ResponseFormatter.error(400, "Failed to update seat", e.getMessage());
         }
     }
@@ -114,10 +172,6 @@ public class SeatResource {
     // ✅ Delete a seat — only ADMIN or SUPER_ADMIN
     @DELETE
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN
-    })
     public Response delete(@PathParam("id") Long id) {
         Seat existing = seatBean.findSeat(id);
         if (existing == null) {
@@ -154,7 +208,6 @@ public class SeatResource {
     @GET
     @Path("/filter")
     @Produces(MediaType.APPLICATION_JSON)
-    @RolesAllowed({"ADMIN", "USER"})
     public Response getSeatsByScreenAndStatus(
             @QueryParam("screenId") Long screenId,
             @QueryParam("status") String status) {

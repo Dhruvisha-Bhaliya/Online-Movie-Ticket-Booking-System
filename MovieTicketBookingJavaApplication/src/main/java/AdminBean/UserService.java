@@ -4,7 +4,7 @@
  */
 package AdminBean;
 
-import entity.Admin;
+import entity.User;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -17,22 +17,22 @@ import java.util.List;
  * @author DELL
  */
 @Stateless
-public class AdminService implements AdminServiceLocal {
+public class UserService implements UserServiceLocal {
 
     @PersistenceContext(unitName = "myMovie")
     private EntityManager em;
 
     // CREATE
     @Override
-    public void addadmin(Admin admin) {
-        em.persist(admin);
+    public void addUser(User user) {
+        em.persist(user);
     }
 
     // READ
     @Override
-    public Admin findByEmail(String email) {
+    public User findByEmail(String email) {
         try {
-            TypedQuery<Admin> q = em.createQuery("SELECT a FROM Admin a WHERE a.email = :email", Admin.class);
+            TypedQuery<User> q = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
             q.setParameter("email", email);
             return q.getSingleResult();
         } catch (NoResultException e) {
@@ -41,28 +41,29 @@ public class AdminService implements AdminServiceLocal {
     }
 
     @Override
-    public List<Admin> findAll() {
-        TypedQuery<Admin> q = em.createQuery("SELECT a FROM Admin a", Admin.class);
-        return q.getResultList();
+    public User findById(Long id) {
+        return em.find(User.class, id);
     }
 
     @Override
-    public Admin findById(Long id) {
-        return em.find(Admin.class, id);
+    public List<User> findAll() {
+        TypedQuery<User> q = em.createQuery("SELECT u FROM User u", User.class);
+        return q.getResultList();
+    }
+
+    // UPDATE
+    @Override
+    public User updateUser(User user) {
+        return em.merge(user); // Return merged entity
     }
 
     // DELETE
     @Override
-    public void deleteAdmin(Admin admin) {
-        Admin managed = em.find(Admin.class, admin.getAdminId());
+    public void deleteUser(User user) {
+        User managed = em.find(User.class, user.getUserId());
         if (managed != null) {
             em.remove(managed);
-            em.flush();  
+            em.flush();
         }
-    }
-
-    @Override
-    public Admin updateAdmin(Admin admin) {
-        return em.merge(admin); // Return merged entity to ensure freshness
     }
 }

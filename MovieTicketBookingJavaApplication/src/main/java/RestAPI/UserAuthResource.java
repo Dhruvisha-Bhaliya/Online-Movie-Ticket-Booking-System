@@ -4,11 +4,13 @@
  */
 package RestAPI;
 
-
 import AuthServiceAPI.AuthServiceAPI;
 import RestAPIStructure.ResponseFormatter;
 import entity.User;
+import jakarta.ejb.EJB;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Map;
@@ -18,39 +20,65 @@ import java.util.Map;
  *
  * @author DELL
  */
-@Path("/user/auth")
+@Path("user/auth")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserAuthResource {
- private final AuthServiceAPI authService = new AuthServiceAPI();
 
-    @POST
-    @Path("/register")
-    public Response register(User user) {
-        try {
-            var apiResponse = authService.registerUser(user);
-            return ResponseFormatter.success(
-                    apiResponse.getStatus_code(),
-                    apiResponse.getMessage(),
-                    apiResponse.getData()
-            );
-        } catch (Exception e) {
-            return ResponseFormatter.error(500, "User registration failed", e.getMessage());
+  @EJB
+    private AuthServiceAPI authService;
+
+    // Helper method to consolidate success/error response formatting
+    private Response respond(RestAPIStructure.ApiResponse<?> apiResponse) {
+        if (apiResponse.isStatus()) {
+            return ResponseFormatter.success(apiResponse.getStatus_code(), apiResponse.getMessage(), apiResponse.getData());
+        } else {
+            return ResponseFormatter.error(apiResponse.getStatus_code(), apiResponse.getMessage(), null);
         }
     }
 
+    // C - Register New Customer
+    @POST
+    @Path("/register")
+    public Response register(User user) {
+        var apiResponse = authService.registerUser(user);
+        return respond(apiResponse);
+    }
+
+    // R - Login Customer
     @POST
     @Path("/login")
     public Response login(Map<String, String> loginData) {
-        try {
-            var apiResponse = authService.loginUser(loginData.get("email"), loginData.get("password"));
-            return ResponseFormatter.success(
-                    apiResponse.getStatus_code(),
-                    apiResponse.getMessage(),
-                    apiResponse.getData()
-            );
-        } catch (Exception e) {
-            return ResponseFormatter.error(500, "User login failed", e.getMessage());
-        }
+        var apiResponse = authService.loginUser(loginData.get("email"), loginData.get("password"));
+        return respond(apiResponse);
+    }
+    
+    // U - Update Customer Profile (Requires Authentication)
+    @PUT
+    @Path("/profile")
+    public Response updateProfile(User updatedUser, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString("Authorization");
+        var apiResponse = authService.updateUserProfile(updatedUser, authHeader);
+        return respond(apiResponse);
+    }
+
+    // U - Update Customer Password (Requires Authentication)
+    @PUT
+    @Path("/updatePassword")
+    public Response updatePassword(Map<String, String> requestBody, @Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString("Authorization");
+        String oldPassword = requestBody.get("oldPassword");
+        String newPassword = requestBody.get("newPassword");
+        var apiResponse = authService.updateUserPassword(oldPassword, newPassword, authHeader);
+        return respond(apiResponse);
+    }
+
+    // D - Deactivate/Delete Customer Account (Requires Authentication)
+    @DELETE
+    @Path("/delete")
+    public Response deleteAccount(@Context HttpHeaders headers) {
+        String authHeader = headers.getHeaderString("Authorization");
+        var apiResponse = authService.deleteUser(authHeader);
+        return respond(apiResponse);
     }
 }
