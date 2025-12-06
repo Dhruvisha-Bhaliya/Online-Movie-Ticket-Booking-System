@@ -5,9 +5,7 @@
 package RestAPI;
 
 import RestAPIStructure.ResponseFormatter;
-import RestAPIStructure.SecurityRoles;
 import entity.Screen;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -17,11 +15,9 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import java.net.URI;
+import java.util.Date;
 import java.util.List;
 import user_bean.ScreenBeanLocal;
 
@@ -38,10 +34,6 @@ public class ScreenResource {
     @EJB
     private ScreenBeanLocal screenBean;
 
-    @Context
-    private UriInfo uriInfo;
-
-    // ✅ Get all screens (anyone can view)
     @GET
     public Response getAll() {
         try {
@@ -52,7 +44,6 @@ public class ScreenResource {
         }
     }
 
-    // ✅ Get screen by ID (anyone can view)
     @GET
     @Path("{id}")
     public Response getById(@PathParam("id") Long id) {
@@ -64,58 +55,55 @@ public class ScreenResource {
         return ResponseFormatter.success(200, "Screen fetched successfully", s);
     }
 
-    // ✅ Add new screen (restricted roles)
     @POST
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER,
-        SecurityRoles.STAFF
-    })
     public Response create(Screen screen) {
         try {
+            Date now = new Date();
+            screen.setCreatedAt(now);
+            screen.setUpdatedAt(now);
+
             screenBean.createScreen(screen);
-            URI created = uriInfo.getAbsolutePathBuilder()
-                    .path(String.valueOf(screen.getScreenId()))
-                    .build();
-            return Response.created(created)
-                    .entity(ResponseFormatter.success(201, "Screen created successfully", screen))
-                    .build();
+
+            return ResponseFormatter.success(
+                    201,
+                    "Screen created successfully",
+                    screen
+            );
+
         } catch (Exception e) {
             return ResponseFormatter.error(400, "Failed to create screen", e.getMessage());
         }
     }
 
-    // ✅ Update screen details
     @PUT
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER
-    })
-    public Response update(@PathParam("id") Long id, Screen updated) {
-        Screen existing = screenBean.findScreen(id);
-        if (existing == null) {
-            return ResponseFormatter.error(404, "Screen not found", null);
-        }
+    public Response update(@PathParam("id") Long id, Screen updatedData) {
 
         try {
-            updated.setScreenId(id);
-            screenBean.editScreen(updated);
-            return ResponseFormatter.success(200, "Screen updated successfully", updated);
+            Screen existing = screenBean.findScreen(id);
+
+            if (existing == null) {
+                return ResponseFormatter.error(404, "Screen not found", null);
+            }
+
+            existing.setScreenName(updatedData.getScreenName());
+            existing.setCapacity(updatedData.getCapacity());
+            existing.setTheaterId(updatedData.getTheaterId());
+            existing.setScreenNumber(updatedData.getScreenNumber());
+            existing.setStatus(updatedData.getStatus());
+
+            existing.setUpdatedAt(new Date());
+            screenBean.editScreen(existing);
+
+            return ResponseFormatter.success(200, "Screen updated successfully", existing);
+
         } catch (Exception e) {
             return ResponseFormatter.error(400, "Failed to update screen", e.getMessage());
         }
     }
 
-    // ✅ Delete screen (only admin/super-admin)
     @DELETE
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN
-    })
     public Response delete(@PathParam("id") Long id) {
         Screen existing = screenBean.findScreen(id);
         if (existing == null) {

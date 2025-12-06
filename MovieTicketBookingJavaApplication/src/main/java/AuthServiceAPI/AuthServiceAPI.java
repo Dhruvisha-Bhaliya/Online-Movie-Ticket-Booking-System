@@ -5,6 +5,7 @@
 package AuthServiceAPI;
 
 import AdminBean.AdminServiceLocal;
+import AdminBean.UserServiceLocal;
 import RestAPIStructure.ApiResponse;
 import entity.Admin;
 import entity.RoleMaster;
@@ -15,6 +16,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
 import util.JwtUtil;
 import util.PasswordUtil;
 
@@ -24,113 +29,448 @@ import util.PasswordUtil;
  */
 @Stateless
 public class AuthServiceAPI {
-   
+
     @PersistenceContext(unitName = "myMovie")
-    private EntityManager em;
+    private EntityManager em; // Only kept for RoleMaster lookup
 
     @EJB
     private AdminServiceLocal adminService;
 
+    @EJB
+    private UserServiceLocal userService; // Inject the User Service
+
+    private static final String EMAIL_DOMAIN = "cinemaxhub.com";
     private final PasswordUtil passwordUtil = new PasswordUtil();
-    private final JwtUtil jwtUtil = new JwtUtil();
 
-    // ✅ USER REGISTRATION
-    public ApiResponse<User> registerUser(User user) {
+    // ==========================================================
+    // ⭐ CORE HELPERS (Role lookup and Email generation)
+    // ==========================================================
+    // Finds the RoleMaster entity from the database (Persistence logic)
+    private RoleMaster findRoleByName(String roleName) {
         try {
-            RoleMaster role = findRoleByName("CUSTOMER");
-            user.setRole(role);
-            user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
-            em.persist(user);
-
-            return new ApiResponse<>(true, 200, "User registered successfully", user);
-        } catch (Exception e) {
-            return new ApiResponse<>(false, 500, "User registration failed: " + e.getMessage(), null);
+            TypedQuery<RoleMaster> q = em.createQuery(
+                    "SELECT r FROM RoleMaster r WHERE r.role = :roleName", RoleMaster.class);
+            q.setParameter("roleName", roleName);
+            return q.getSingleResult();
+        } catch (NoResultException ex) {
+            return null;
         }
     }
 
-    // ✅ USER LOGIN
-    public ApiResponse<String> loginUser(String email, String password) {
-        try {
-            User user = findUserByEmail(email);
-            if (user == null) {
-                return new ApiResponse<>(false, 404, "User not found", null);
-            }
-
-            if (!passwordUtil.verifyPassword(password, user.getPassword())) {
-                return new ApiResponse<>(false, 401, "Invalid credentials", null);
-            }
-
-            String token = jwtUtil.generateToken(user.getEmail(), user.getRole().getRole());
-            return new ApiResponse<>(true, 200, "Login successful", token);
-
-        } catch (Exception e) {
-            return new ApiResponse<>(false, 500, "Login failed: " + e.getMessage(), null);
+    private String firstFromUsername(String username) {
+        if (username == null) {
+            return "user";
         }
+        String t = username.trim().toLowerCase();
+        if (t.isEmpty()) {
+            return "user";
+        }
+        String[] parts = t.split("\\s+");
+        String first = parts[0].replaceAll("[^a-z0-9]", "");
+        return first.isEmpty() ? "user" : first;
     }
 
-    // ✅ ADMIN REGISTRATION
-    public ApiResponse<Admin> registerAdmin(Admin admin) {
+    private String generateRoleEmail(String username, String role) {
+        String base = firstFromUsername(username);
+        String suffix;
+        switch (role) {
+            case "SUPER_ADMIN":
+                suffix = ".sadmin@";
+                break;
+            case "ADMIN":
+                suffix = ".admin@";
+                break;
+            case "MANAGER":
+                suffix = ".manager@";
+                break;
+            case "STAFF":
+                suffix = ".staff@";
+                break;
+            default:
+                suffix = ".user@";
+                break;
+        }
+        return base + suffix + EMAIL_DOMAIN;
+    }
+
+    // Ensures email is unique by appending an index if a conflict is found in either table
+    private String ensureUniqueEmail(String candidate) {
+        String email = candidate;
+        int i = 1;
+        while (adminService.findByEmail(email) != null || userService.findByEmail(email) != null) {
+            // Logic to correctly append index (same as your original logic)
+            int at = candidate.indexOf("@");
+            String left = candidate.substring(0, at);
+            String right = candidate.substring(at);
+            int lastDot = left.lastIndexOf('.');
+            String basePart = (lastDot != -1) ? left.substring(0, lastDot) : left;
+            email = basePart + i + left.substring(lastDot) + right;
+            i++;
+            if (i > 1000) {
+                break;
+            }
+        }
+        return email;
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+    }
+
+    private boolean isPasswordStrong(String p) {
+        return p != null && p.length() >= 6;
+    }
+
+    // ==========================================================
+    // 🛡️ ADMIN MANAGEMENT (CRUD)
+    // ==========================================================
+    // 1. REGISTER ADMIN (Hierarchical Creation)
+    public ApiResponse<Map<String, Object>> registerAdmin(Admin admin, String creatorAuthHeader) {
         try {
-            RoleMaster role = assignAdminRoleByEmail(admin.getEmail());
-            admin.setRole(role);
+            if (admin == null || admin.getUsername() == null || admin.getUsername().isEmpty()) {
+                return new ApiResponse<>(false, 400, "Invalid request/Username required", null);
+            }
+            if (!isPasswordStrong(admin.getPassword())) {
+                return new ApiResponse<>(false, 400, "Password must be >= 6 characters", null);
+            }
+
+            List<Admin> existing = adminService.findAll();
+            boolean isBootstrap = existing == null || existing.isEmpty();
+
+            String creatorRole = null;
+            if (creatorAuthHeader != null) {
+                String token = JwtUtil.getTokenFromHeader(creatorAuthHeader);
+                if (token != null && JwtUtil.validateToken(token)) {
+                    creatorRole = JwtUtil.extractRole(token);
+                }
+            }
+
+            String assignRole;
+            if (isBootstrap) {
+                assignRole = "SUPER_ADMIN";
+            } else {
+                if (creatorRole == null || !List.of("SUPER_ADMIN", "ADMIN", "MANAGER").contains(creatorRole)) {
+                    return new ApiResponse<>(false, 403, "Insufficient privileges or token required.", null);
+                }
+                assignRole = switch (creatorRole) {
+                    case "SUPER_ADMIN" ->
+                        "ADMIN";
+                    case "ADMIN" ->
+                        "MANAGER";
+                    case "MANAGER" ->
+                        "STAFF";
+                    default ->
+                        null;
+                };
+                if (assignRole == null) {
+                    return new ApiResponse<>(false, 403, "Creator cannot create any more admin roles.", null);
+                }
+            }
+
+            // Generate unique email
+            String candidate = generateRoleEmail(admin.getUsername(), assignRole);
+            String finalEmail = ensureUniqueEmail(candidate);
+
+            RoleMaster roleEntity = findRoleByName(assignRole);
+            if (roleEntity == null) {
+                return new ApiResponse<>(false, 500, "Role not found: " + assignRole, null);
+            }
+
+            // Set mandatory fields
+            admin.setRole(roleEntity);
+            admin.setEmail(finalEmail);
             admin.setPassword(PasswordUtil.hashPassword(admin.getPassword()));
+            admin.setStatus(admin.getStatus() == null || admin.getStatus().isEmpty() ? "active" : admin.getStatus());
+            admin.setCreatedAt(new Date());
+            admin.setUpdatedAt(new Date());
+            // phoneno is already set by JAX-RS unmarshalling or is null
 
-            adminService.addadmin(admin);
-            return new ApiResponse<>(true, 200, "Admin registered successfully", admin);
+            adminService.addadmin(admin); // Persistence delegated
+
+            String token = JwtUtil.generateToken(admin.getEmail(), roleEntity.getRole());
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("email", admin.getEmail());
+            data.put("role", roleEntity.getRole());
+            data.put("username", admin.getUsername());
+
+            return new ApiResponse<>(true, 200, "Admin registered successfully", data);
         } catch (Exception e) {
             return new ApiResponse<>(false, 500, "Admin registration failed: " + e.getMessage(), null);
         }
     }
 
-    // ✅ ADMIN LOGIN
-    public ApiResponse<String> loginAdmin(String email, String password) {
+    // 2. LOGIN ADMIN
+    public ApiResponse<Map<String, Object>> loginAdmin(String email, String password) {
         try {
-            Admin admin = adminService.findByEmailAndPassword(email, password);
-            if (admin == null) {
-                return new ApiResponse<>(false, 404, "Invalid email or password", null);
+            if (!isValidEmail(email)) {
+                return new ApiResponse<>(false, 400, "Invalid email format", null);
+            }
+            Admin a = adminService.findByEmail(email); // Persistence delegated
+            if (a == null) {
+                return new ApiResponse<>(false, 404, "Admin not found", null);
+            }
+            if (!passwordUtil.verifyPassword(password, a.getPassword())) {
+                return new ApiResponse<>(false, 401, "Invalid credentials", null);
+            }
+            if ("inactive".equals(a.getStatus())) {
+                return new ApiResponse<>(false, 403, "Account is inactive/blocked.", null);
             }
 
-            String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole().getRole());
-            return new ApiResponse<>(true, 200, "Login successful", token);
+            String token = JwtUtil.generateToken(a.getEmail(), a.getRole().getRole());
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("email", a.getEmail());
+            data.put("role", a.getRole().getRole());
+            data.put("username", a.getUsername());
+            data.put("phoneno", a.getPhoneno());
 
+            return new ApiResponse<>(true, 200, "Login successful", data);
         } catch (Exception e) {
             return new ApiResponse<>(false, 500, "Login failed: " + e.getMessage(), null);
         }
     }
 
-    // ✅ Helper: Find Role by name
-    private RoleMaster findRoleByName(String roleName) {
+    // 3. UPDATE ADMIN PROFILE
+    public ApiResponse<Admin> updateAdminProfile(Admin updatedAdmin, String authHeader) {
+        String token = JwtUtil.getTokenFromHeader(authHeader);
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return new ApiResponse<>(false, 401, "Invalid or missing token.", null);
+        }
+        String email = JwtUtil.extractEmail(token);
+        Admin existingAdmin = adminService.findByEmail(email);
+
+        if (existingAdmin == null) {
+            return new ApiResponse<>(false, 404, "Admin not found.", null);
+        }
+
         try {
-            TypedQuery<RoleMaster> query = em.createQuery(
-                "SELECT r FROM RoleMaster r WHERE r.roleName = :roleName", RoleMaster.class);
-            query.setParameter("roleName", roleName);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
+            // Business rule: Allow self-update of username and phone number
+            if (updatedAdmin.getUsername() != null && !updatedAdmin.getUsername().isEmpty()) {
+                existingAdmin.setUsername(updatedAdmin.getUsername());
+            }
+            if (updatedAdmin.getPhoneno() != null && updatedAdmin.getPhoneno() != 0L) {
+                existingAdmin.setPhoneno(updatedAdmin.getPhoneno());
+            }
+            existingAdmin.setUpdatedAt(new Date());
+
+            Admin mergedAdmin = adminService.updateAdmin(existingAdmin); // Persistence delegated
+
+            return new ApiResponse<>(true, 200, "Admin profile updated successfully.", mergedAdmin);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Profile update failed: " + e.getMessage(), null);
         }
     }
 
-    // ✅ Helper: Find User by email
-    private User findUserByEmail(String email) {
+    // 4. UPDATE ADMIN PASSWORD
+    public ApiResponse<Map<String, Object>> updateAdminPassword(String oldPassword, String newPassword, String authHeader) {
+        String token = JwtUtil.getTokenFromHeader(authHeader);
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return new ApiResponse<>(false, 401, "Invalid or missing token.", null);
+        }
+        String email = JwtUtil.extractEmail(token);
+        Admin admin = adminService.findByEmail(email);
+
+        if (admin == null) {
+            return new ApiResponse<>(false, 404, "Admin not found.", null);
+        }
+        if (!passwordUtil.verifyPassword(oldPassword, admin.getPassword())) {
+            return new ApiResponse<>(false, 401, "Invalid old password.", null);
+        }
+        if (!isPasswordStrong(newPassword)) {
+            return new ApiResponse<>(false, 400, "New password must be >= 6 characters.", null);
+        }
+
         try {
-            TypedQuery<User> query = em.createQuery(
-                "SELECT u FROM User u WHERE u.email = :email", User.class);
-            query.setParameter("email", email);
-            return query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
+            admin.setPassword(PasswordUtil.hashPassword(newPassword));
+            admin.setUpdatedAt(new Date());
+            adminService.updateAdmin(admin); // Persistence delegated
+
+            return new ApiResponse<>(true, 200, "Admin Password updated successfully.", null);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Password update failed: " + e.getMessage(), null);
         }
     }
 
-    // ✅ Helper: Role assignment logic for Admin
-    private RoleMaster assignAdminRoleByEmail(String email) {
-        email = email.toLowerCase();
+    // 5. DELETE ADMIN ACCOUNT (Self-Deactivation/Soft Delete)
+    public ApiResponse<String> deleteAdmin(String authHeader) {
+        String token = JwtUtil.getTokenFromHeader(authHeader);
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return new ApiResponse<>(false, 401, "Invalid or missing token.", null);
+        }
 
-        if (email.contains(".superadmin@")) return findRoleByName("SUPER_ADMIN");
-        if (email.contains(".manager@")) return findRoleByName("MANAGER");
-        if (email.contains(".staff@")) return findRoleByName("STAFF");
-        if (email.contains(".admin@")) return findRoleByName("ADMIN");
+        String email = JwtUtil.extractEmail(token);
+        Admin adminToDelete = adminService.findByEmail(email);
 
-        return findRoleByName("CUSTOMER");
+        if (adminToDelete == null) {
+            return new ApiResponse<>(false, 404, "Admin not found.", null);
+        }
+
+        try {
+            adminService.deleteAdmin(adminToDelete);   // ← REAL DELETE
+            return new ApiResponse<>(true, 200, "Admin account deleted successfully.", null);
+
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Delete failed: " + e.getMessage(), null);
+        }
+    }
+
+// ==========================================================
+    // 👤 USER MANAGEMENT (CRUD)
+    // ==========================================================
+    // 1. REGISTER USER (Customer)
+    public ApiResponse<Map<String, Object>> registerUser(User user) {
+        try {
+            if (user == null || user.getUsername() == null || user.getUsername().isEmpty()) {
+                return new ApiResponse<>(false, 400, "Invalid request/Username required", null);
+            }
+            if (!isValidEmail(user.getEmail())) {
+                return new ApiResponse<>(false, 400, "Invalid email format", null);
+            }
+            if (!isPasswordStrong(user.getPassword())) {
+                return new ApiResponse<>(false, 400, "Password must be >= 6 characters", null);
+            }
+            if (adminService.findByEmail(user.getEmail()) != null || userService.findByEmail(user.getEmail()) != null) {
+                return new ApiResponse<>(false, 409, "Email already registered.", null);
+            }
+
+            RoleMaster role = findRoleByName("CUSTOMER");
+            if (role == null) {
+                return new ApiResponse<>(false, 500, "Role CUSTOMER not found", null);
+            }
+
+            user.setRole(role);
+            user.setPassword(PasswordUtil.hashPassword(user.getPassword()));
+            user.setStatus(user.getStatus() == null || user.getStatus().isEmpty() ? "active" : user.getStatus());
+            user.setCreatedAt(new Date());
+            user.setUpdatedAt(new Date());
+
+            userService.addUser(user); // Persistence delegated
+
+            String token = JwtUtil.generateToken(user.getEmail(), role.getRole());
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("email", user.getEmail());
+            data.put("role", role.getRole());
+            data.put("username", user.getUsername());
+
+            return new ApiResponse<>(true, 200, "User registered successfully", data);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "User registration failed: " + e.getMessage(), null);
+        }
+    }
+
+    // 2. LOGIN USER
+    public ApiResponse<Map<String, Object>> loginUser(String email, String password) {
+        try {
+            if (!isValidEmail(email)) {
+                return new ApiResponse<>(false, 400, "Invalid email format", null);
+            }
+            User u = userService.findByEmail(email); // Persistence delegated
+            if (u == null) {
+                return new ApiResponse<>(false, 404, "User not found", null);
+            }
+            if (!passwordUtil.verifyPassword(password, u.getPassword())) {
+                return new ApiResponse<>(false, 401, "Invalid credentials", null);
+            }
+            if ("inactive".equals(u.getStatus())) {
+                return new ApiResponse<>(false, 403, "Account is inactive/blocked.", null);
+            }
+
+            String token = JwtUtil.generateToken(u.getEmail(), u.getRole().getRole());
+            Map<String, Object> data = new HashMap<>();
+            data.put("token", token);
+            data.put("email", u.getEmail());
+            data.put("role", u.getRole().getRole());
+            data.put("username", u.getUsername());
+
+            return new ApiResponse<>(true, 200, "Login successful", data);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Login failed: " + e.getMessage(), null);
+        }
+    }
+
+    // 3. UPDATE USER PROFILE
+    public ApiResponse<User> updateUserProfile(User updatedUser, String authHeader) {
+        String token = JwtUtil.getTokenFromHeader(authHeader);
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return new ApiResponse<>(false, 401, "Invalid or missing token.", null);
+        }
+        String email = JwtUtil.extractEmail(token);
+        User existingUser = userService.findByEmail(email);
+
+        if (existingUser == null) {
+            return new ApiResponse<>(false, 404, "User not found.", null);
+        }
+
+        try {
+            // Business rule: Allow self-update of username and phone number
+            if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty()) {
+                existingUser.setUsername(updatedUser.getUsername());
+            }
+            if (updatedUser.getPhoneno() != null && updatedUser.getPhoneno() != 0L) {
+                existingUser.setPhoneno(updatedUser.getPhoneno());
+            }
+            existingUser.setUpdatedAt(new Date());
+
+            User mergedUser = userService.updateUser(existingUser); // Persistence delegated
+
+            return new ApiResponse<>(true, 200, "User profile updated successfully.", mergedUser);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Profile update failed: " + e.getMessage(), null);
+        }
+    }
+
+    // 4. UPDATE USER PASSWORD
+    public ApiResponse<Map<String, Object>> updateUserPassword(String oldPassword, String newPassword, String authHeader) {
+        String token = JwtUtil.getTokenFromHeader(authHeader);
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return new ApiResponse<>(false, 401, "Invalid or missing token.", null);
+        }
+        String email = JwtUtil.extractEmail(token);
+        User user = userService.findByEmail(email);
+
+        if (user == null) {
+            return new ApiResponse<>(false, 404, "User not found.", null);
+        }
+        if (!passwordUtil.verifyPassword(oldPassword, user.getPassword())) {
+            return new ApiResponse<>(false, 401, "Invalid old password.", null);
+        }
+        if (!isPasswordStrong(newPassword)) {
+            return new ApiResponse<>(false, 400, "New password must be >= 6 characters.", null);
+        }
+
+        try {
+            user.setPassword(PasswordUtil.hashPassword(newPassword));
+            user.setUpdatedAt(new Date());
+            userService.updateUser(user); // Persistence delegated
+
+            return new ApiResponse<>(true, 200, "User Password updated successfully.", null);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Password update failed: " + e.getMessage(), null);
+        }
+    }
+
+    // 5. DELETE USER ACCOUNT (Self-Deactivation/Soft Delete)
+    public ApiResponse<String> deleteUser(String authHeader) {
+        String token = JwtUtil.getTokenFromHeader(authHeader);
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return new ApiResponse<>(false, 401, "Invalid or missing token.", null);
+        }
+        String email = JwtUtil.extractEmail(token);
+        User userToDelete = userService.findByEmail(email);
+
+        if (userToDelete == null) {
+            return new ApiResponse<>(false, 404, "User not found.", null);
+        }
+
+        try {
+            // Soft Delete: Deactivate the account
+            userService.deleteUser(userToDelete);   // ← REAL DELETE
+
+            return new ApiResponse<>(true, 200, "User account deactivated successfully.", null);
+        } catch (Exception e) {
+            return new ApiResponse<>(false, 500, "Deactivation failed: " + e.getMessage(), null);
+        }
     }
 }

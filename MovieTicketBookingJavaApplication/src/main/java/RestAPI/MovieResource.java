@@ -5,9 +5,7 @@
 package RestAPI;
 
 import RestAPIStructure.ResponseFormatter;
-import RestAPIStructure.SecurityRoles;
 import entity.Movie;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -22,7 +20,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import user_bean.MovieBeanLocal;
 
 /**
@@ -33,13 +33,13 @@ import user_bean.MovieBeanLocal;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MovieResource {
-   @EJB
+
+    @EJB
     private MovieBeanLocal movieBean;
 
     @Context
     private UriInfo uriInfo;
 
-    // ✅ Anyone can view movies (public access)
     @GET
     public Response getAll() {
         try {
@@ -50,72 +50,85 @@ public class MovieResource {
         }
     }
 
-    // ✅ Anyone can view movie details
     @GET
     @Path("{id}")
     public Response getById(@PathParam("id") Long id) {
         Movie m = movieBean.findMovie(id);
-        if (m == null)
+        if (m == null) {
             return ResponseFormatter.error(404, "Movie not found", null);
+        }
 
         return ResponseFormatter.success(200, "Movie fetched successfully", m);
     }
 
-    // ✅ Only ADMIN, SUPER_ADMIN, MANAGER, STAFF can add new movies
     @POST
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER,
-        SecurityRoles.STAFF
-    })
     public Response create(Movie movie) {
         try {
             movieBean.addMovie(movie);
-            URI created = uriInfo.getAbsolutePathBuilder()
-                                 .path(String.valueOf(movie.getMovieId()))
-                                 .build();
-            return Response.created(created)
-                    .entity(ResponseFormatter.success(201, "Movie created successfully", movie))
-                    .build();
+
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("status", true);
+            resp.put("status_code", 201);
+            resp.put("message", "Movie created successfully");
+            resp.put("data", movie);
+
+            return Response.status(201).entity(resp).build();
+
         } catch (Exception e) {
-            return ResponseFormatter.error(400, "Failed to create movie", e.getMessage());
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("status", false);
+            error.put("status_code", 400);
+            error.put("message", "Failed to create movie");
+            error.put("errors", e.getMessage());
+
+            return Response.status(400).entity(error).build();
         }
     }
 
-    // ✅ Only ADMIN, SUPER_ADMIN, MANAGER can update movie
     @PUT
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN,
-        SecurityRoles.MANAGER
-    })
     public Response update(@PathParam("id") Long id, Movie updated) {
         Movie existing = movieBean.findMovie(id);
-        if (existing == null)
+        if (existing == null) {
             return ResponseFormatter.error(404, "Movie not found", null);
+        }
 
         try {
-            updated.setMovieId(id);
-            movieBean.updateMovie(updated);
-            return ResponseFormatter.success(200, "Movie updated successfully", updated);
+            for (var f : Movie.class.getDeclaredFields()) {
+                f.setAccessible(true);
+
+                if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
+                    continue;
+                }
+                if (java.lang.reflect.Modifier.isFinal(f.getModifiers())) {
+                    continue;
+                }
+                if (f.getName().equals("movieId")) {
+                    continue;
+                }
+
+                Object val = f.get(updated);
+                if (val != null) {
+                    f.set(existing, val);
+                }
+            }
+
+            movieBean.updateMovie(existing);
+            return ResponseFormatter.success(200, "Movie updated successfully", existing);
+
         } catch (Exception e) {
             return ResponseFormatter.error(400, "Failed to update movie", e.getMessage());
         }
     }
 
-    // ✅ Only ADMIN or SUPER_ADMIN can delete movie
     @DELETE
     @Path("{id}")
-    @RolesAllowed({
-        SecurityRoles.ADMIN,
-        SecurityRoles.SUPER_ADMIN
-    })
     public Response delete(@PathParam("id") Long id) {
         Movie existing = movieBean.findMovie(id);
-        if (existing == null)
+        if (existing == null) {
             return ResponseFormatter.error(404, "Movie not found", null);
+        }
 
         try {
             movieBean.deleteMovie(id);

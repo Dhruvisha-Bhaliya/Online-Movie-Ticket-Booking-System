@@ -4,6 +4,7 @@
  */
 package entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -45,8 +46,10 @@ public class RoleMaster implements Serializable {
     @Column(name = "description")
     private String description;
     @OneToMany(mappedBy = "role")
+    @JsonbTransient
     private Collection<Admin> adminCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "role")
+    @JsonbTransient
     private Collection<User> userCollection;
 
     public RoleMaster() {

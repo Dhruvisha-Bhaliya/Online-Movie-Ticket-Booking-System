@@ -4,7 +4,7 @@
  */
 package AdminBean;
 
-import entity.Admin;
+import entity.User;
 import jakarta.ejb.Local;
 import java.util.List;
 
@@ -13,17 +13,11 @@ import java.util.List;
  * @author DELL
  */
 @Local
-public interface AdminServiceLocal {
-
-    void addadmin(Admin admin);
-
-    Admin findByEmail(String email);
-
-    List<Admin> findAll();
-
-    Admin findById(Long id);
-
-    Admin updateAdmin(Admin admin);
-
-    void deleteAdmin(Admin admin);
+public interface UserServiceLocal {
+     void addUser(User user);
+    User findByEmail(String email);
+    User findById(Long id);
+    List<User> findAll();
+    User updateUser(User user);
+    void deleteUser(User user);
 }

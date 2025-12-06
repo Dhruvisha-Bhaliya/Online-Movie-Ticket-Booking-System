@@ -14,7 +14,6 @@ public class ApiResponse<T> {
     private int status_code;
     private String message;
     private T data;
-    private Object appSettings;
 
     public ApiResponse() {
     }
@@ -24,11 +23,6 @@ public class ApiResponse<T> {
         this.status_code = status_code;
         this.message = message;
         this.data = data;
-    }
-
-    public ApiResponse(boolean status, int status_code, String message, T data, Object appSettings) {
-        this(status, status_code, message, data);
-        this.appSettings = appSettings;
     }
 
     public boolean isStatus() {
@@ -61,13 +55,5 @@ public class ApiResponse<T> {
 
     public void setData(T data) {
         this.data = data;
-    }
-
-    public Object getAppSettings() {
-        return appSettings;
-    }
-
-    public void setAppSettings(Object appSettings) {
-        this.appSettings = appSettings;
     }
 }
