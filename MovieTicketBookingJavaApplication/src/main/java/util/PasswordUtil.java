@@ -19,7 +19,6 @@ public class PasswordUtil {
         return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
     }
 
-// Verify the password
     public boolean verifyPassword(String plainPassword, String hashedPassword) {
         if (plainPassword == null || hashedPassword == null) {
             return false;

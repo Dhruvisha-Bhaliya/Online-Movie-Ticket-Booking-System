@@ -4,7 +4,6 @@
  */
 package AuthSignupBean;
 
-
 import entity.RoleMaster;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.SessionScoped;
@@ -16,10 +15,11 @@ import java.util.List;
  *
  * @author DELL
  */
-@Named("authSignupBean")   // 👈 This name MUST match the one in your .xhtml: #{authBean}
+@Named("authSignupBean")
 @SessionScoped
-public class AuthSignupBean implements Serializable{
-private String username;
+public class AuthSignupBean implements Serializable {
+
+    private String username;
     private String email;
     private String password;
     private Long selectedRole;
@@ -43,8 +43,6 @@ private String username;
         }
 
         authService.signUp(username, email, password, selectedRole);
-
-        // Find selected role name
         RoleMaster role = roleList.stream()
                 .filter(r -> r.getRoleId().equals(selectedRole))
                 .findFirst()
@@ -66,8 +64,6 @@ private String username;
 
         String roleName = role.getRole().toLowerCase();
         String expectedEmailPattern = username + "@" + roleName + ".com";
-
-        // ✅ Email validation rules
         if (!roleName.equals("customer") && !roleName.equals("user")) {
             if (!email.equalsIgnoreCase(expectedEmailPattern)) {
                 message = "Invalid email format for role " + roleName
@@ -75,8 +71,6 @@ private String username;
                 return null;
             }
         }
-
-        // Call login service if validation passes
         boolean valid = authService.validateLogin(username, email, password, roleName);
         if (valid) {
             message = "Login successful as " + roleName;
@@ -87,7 +81,6 @@ private String username;
         }
     }
 
-    // Getters and Setters
     public String getUsername() {
         return username;
     }

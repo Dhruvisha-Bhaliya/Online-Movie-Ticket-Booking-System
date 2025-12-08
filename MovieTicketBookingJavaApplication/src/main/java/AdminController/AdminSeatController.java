@@ -31,17 +31,17 @@ public class AdminSeatController implements Serializable {
     private ScreenBeanLocal screenBean;
 
     private Seat currentSeat;
-    private Long selectedScreenId; // For dropdown selection
+    private Long selectedScreenId;
     private List<Screen> screenList;
-    private List<Seat> seatList; // All seats
-    private List<Seat> seatsForSelectedScreen; // Seats filtered by screen
+    private List<Seat> seatList;
+    private List<Seat> seatsForSelectedScreen;
     private boolean editMode = false;
 
     @PostConstruct
     public void init() {
         currentSeat = new Seat();
         loadScreenList();
-        loadSeatList(); // Load all seats initially
+        loadSeatList();
     }
 
     public void loadScreenList() {
@@ -62,19 +62,12 @@ public class AdminSeatController implements Serializable {
         }
     }
 
-    // --- CRUD Action Methods ---
     public String saveSeat() {
-
-        // 1. Load the selected screen (foreign key)
         Screen selectedScreen = screenBean.findScreen(selectedScreenId);
         currentSeat.setScreenId(selectedScreen);
-
-        // 2. If status is null, set default
         if (currentSeat.getStatus() == null || currentSeat.getStatus().isEmpty()) {
             currentSeat.setStatus("ACTIVE");
         }
-
-        // 3. Handle create vs update
         if (editMode) {
             currentSeat.setUpdatedAt(new Date());
             seatBean.editSeat(currentSeat);
@@ -84,8 +77,6 @@ public class AdminSeatController implements Serializable {
             currentSeat.setUpdatedAt(now);
             seatBean.createSeat(currentSeat);
         }
-
-        // 4. UI Refresh
         resetForm();
         updateSeatsForScreen();
         loadSeatList();
@@ -95,13 +86,13 @@ public class AdminSeatController implements Serializable {
 
     public void editSeat(Seat seat) {
         this.currentSeat = seat;
-        this.selectedScreenId = seat.getScreenId().getScreenId(); // Set dropdown value
+        this.selectedScreenId = seat.getScreenId().getScreenId();
         this.editMode = true;
     }
 
     public void deleteSeat(Seat seat) {
         seatBean.removeSeat(seat);
-        updateSeatsForScreen(); // Refresh the displayed list
+        updateSeatsForScreen();
         loadSeatList();
     }
 
@@ -111,7 +102,6 @@ public class AdminSeatController implements Serializable {
         editMode = false;
     }
 
-    // --- Getters and Setters ---
     public Seat getCurrentSeat() {
         return currentSeat;
     }
@@ -126,7 +116,7 @@ public class AdminSeatController implements Serializable {
 
     public void setSelectedScreenId(Long selectedScreenId) {
         this.selectedScreenId = selectedScreenId;
-        updateSeatsForScreen(); // Auto-update when screen selection changes
+        updateSeatsForScreen();
     }
 
     public List<Screen> getScreenList() {

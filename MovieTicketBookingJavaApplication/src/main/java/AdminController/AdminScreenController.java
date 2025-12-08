@@ -28,11 +28,11 @@ public class AdminScreenController implements Serializable {
     private ScreenBeanLocal screenBean;
 
     @EJB
-    private TheaterBeanLocal theaterBean; // Inject the Theater bean to get the list of options
+    private TheaterBeanLocal theaterBean;
 
     private Screen currentScreen;
     private List<Screen> screenList;
-    private List<Theater> theaterList; // List for the dropdown menu
+    private List<Theater> theaterList;
     private boolean editMode = false;
 
     @PostConstruct
@@ -43,10 +43,9 @@ public class AdminScreenController implements Serializable {
 
     private void loadData() {
         screenList = screenBean.findAllScreen();
-        theaterList = theaterBean.findallTheater(); // Assuming findallTheater() is the correct method
+        theaterList = theaterBean.findallTheater();
     }
 
-    // --- Action Methods ---
     public String saveScreen() {
 
         if (currentScreen.getStatus() == null) {
@@ -82,7 +81,6 @@ public class AdminScreenController implements Serializable {
         editMode = false;
     }
 
-    // --- Getters and Setters ---
     public Screen getCurrentScreen() {
         return currentScreen;
     }
@@ -98,7 +96,7 @@ public class AdminScreenController implements Serializable {
 
     public List<Theater> getTheaterList() {
         return theaterList;
-    } // Getter for the dropdown items
+    }
 
     public boolean isEditMode() {
         return editMode;

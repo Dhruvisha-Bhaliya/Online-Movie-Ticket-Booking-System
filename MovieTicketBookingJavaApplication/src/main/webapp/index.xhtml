@@ -29,7 +29,7 @@
                     <!-- Search input with AJAX to show live suggestions -->
                     <h:inputText id="searchBox" styleClass="search-box"
                                  value="#{searchController.searchQuery}"
-                                
+
                                  onkeyup="jsf.ajax.request(this, event, {execute: 'searchBox', render: 'suggestions'});" 
                                  />
 
@@ -50,12 +50,27 @@
                                      action="#{searchController.performSearch()}" />
                 </h:form>
 
-
-                <h:link outcome="login" styleClass="login-button">
-                    <h:outputText value="Login" />
-                </h:link>
+                <h:panelGroup rendered="#{not empty sessionScope.user}">
+                    <div class="user-menu">
+                        <div class="user-icon" onclick="toggleLogoutMenu()">
+                            #{sessionScope.user.username.substring(0,1).toUpperCase()}
+                        </div>
+                        <div id="logoutBox" class="logout-box" style="display:none;">
+                            <h:form id="logoutForm"> <a href="#" class="logout-btn" onclick="return confirmLogout(event);">
+                                    Logout
+                                </a>
+                                <h:commandButton id="realLogout"
+                                                 action="#{userAuthBean.logout}"
+                                                 style="display:none;" />
+                            </h:form>
+                        </div>
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{empty sessionScope.user}">
+                    <h:link outcome="login" styleClass="login-button">Login</h:link>
+                    <h:link outcome="register" styleClass="btn-register">Register</h:link>
+                </h:panelGroup>
             </div>
-
         </div>
 
         <!--        <div style="padding: 20px;">
@@ -124,5 +139,18 @@
         </div>
 
         <h:outputScript library="js" name="script.js" />
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <h:panelGroup rendered="#{flash.logoutSuccess}">
+            <script>
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Logged out successfully!',
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+            </script>
+        </h:panelGroup>
     </h:body>
 </html>

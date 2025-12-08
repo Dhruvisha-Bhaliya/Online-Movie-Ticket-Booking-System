@@ -17,7 +17,6 @@ public class ResponseFormatter {
         return Response.status(statusCode).entity(res).build();
     }
 
-// Error Response
     public static Response error(int statusCode, String message, Object errors) {
         ErrorResponse err = new ErrorResponse(statusCode, message, errors);
         return Response.status(statusCode).entity(err).build();

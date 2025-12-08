@@ -4,31 +4,58 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core">
     <h:head>
-        <title>Login</title>
+        <title>MovieBooker - Login</title>
+        <h:outputStylesheet library="css" name="register.css"/> 
     </h:head>
     <h:body>
-         <h:form>
-            <h:messages globalOnly="true" />
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header"> 
+                    <h2>Login</h2>
+                    <p>Enter your credentials to access MovieBooker.</p> 
+                </div>
 
-            <h:outputLabel for="username" value="Username:" />
-            <h:inputText id="username" value="#{authSignupBean.username}" required="true" />
+                <h:form id="loginForm">
+                    <h:messages globalOnly="true" styleClass="error-message" />
 
-            <h:outputLabel for="email" value="Email:" />
-            <h:inputText id="email" value="#{authSignupBean.email}" required="true" />
+                    <div class="form-group">
+                        <h:outputLabel for="email" value="Email" />
+                        <h:inputText 
+                            id="email" 
+                            value="#{userAuthBean.email}" 
+                            required="true" 
+                            requiredMessage="Email address is required." 
+                            styleClass="input-field"/> 
+                        <h:message for="email" styleClass="error-message field-error" />
+                    </div>
 
-            <h:outputLabel for="password" value="Password:" />
-            <h:inputSecret id="password" value="#{authSignupBean.password}" required="true" />
+                    <div class="form-group">
+                        <h:outputLabel for="password" value="Password" />
+                        <h:inputSecret 
+                            id="password" 
+                            value="#{userAuthBean.password}" 
+                            required="true" 
+                            requiredMessage="Password is required." 
+                            styleClass="input-field"/>
+                        <h:message for="password" styleClass="error-message field-error" />
+                    </div>
 
-            <h:outputLabel for="role" value="Select Role:" />
-            <h:selectOneMenu id="role" value="#{authSignupBean.selectedRoleId}">
-                <f:selectItem itemLabel="-- Select Role --" itemValue="#{null}" />
-                <f:selectItems value="#{authSignupBean.roleList}" var="r"
-                               itemValue="#{r.roleId}" itemLabel="#{r.role}" />
-            </h:selectOneMenu>
+                    <div class="form-group forgot-password"> 
+                        <h:link outcome="forgotPassword.xhtml" styleClass="forgot-link">Forgot Password?</h:link>
+                    </div>
 
+                    <div class="form-group">
+                        <h:commandButton 
+                            value="Login" 
+                            action="#{userAuthBean.login}" 
+                            styleClass="btn-register"/> 
+                    </div>
 
-            <h:commandButton value="login" action="#{authSignupBean.login()}" />
-            <h:outputText value="#{authSignupBean.message}" style="color:red;" />
-        </h:form>
+                    <p class="auth-footer"> 
+                        Don't have an account? <h:link outcome="register.xhtml" styleClass="login-link">Register</h:link>
+                    </p>
+                </h:form>
+            </div>
+        </div>
     </h:body>
 </html>

@@ -19,7 +19,7 @@ import java.util.List;
 @Stateless
 public class AuthService implements AuthServiceLocal {
 
-   @PersistenceContext
+    @PersistenceContext
     private EntityManager em;
 
     @Override
@@ -28,10 +28,8 @@ public class AuthService implements AuthServiceLocal {
 
         List<RoleMaster> list = em.createQuery("SELECT r FROM RoleMaster r", RoleMaster.class)
                 .getResultList();
-
-        // 🔍 Debug output
         for (RoleMaster r : list) {
-            System.out.println("Fetched role: " + r.getRole()); // or r.getRole() depending on your column name
+            System.out.println("Fetched role: " + r.getRole());
         }
         System.out.println("Total roles fetched: " + list.size());
 
@@ -40,7 +38,6 @@ public class AuthService implements AuthServiceLocal {
 
     @Override
     public String login(String email, String password) {
-        // Check admin first
         List<Admin> admins = em.createQuery(
                 "SELECT a FROM Admin a WHERE a.email=:email AND a.password=:pwd", Admin.class
         )
@@ -51,7 +48,6 @@ public class AuthService implements AuthServiceLocal {
             return "admin_Dashboard.xhtml?faces-redirect=true";
         }
 
-        // Check user
         List<User> users = em.createQuery(
                 "SELECT u FROM User u WHERE u.email=:email AND u.password=:pwd", User.class
         )
@@ -96,34 +92,32 @@ public class AuthService implements AuthServiceLocal {
     }
 
     @Override
-public boolean validateLogin(String username, String email, String password, String roleName) {
-    try {
-        Long count;
-        if (roleName.equalsIgnoreCase("admin")) {
-            count = em.createQuery(
-                    "SELECT COUNT(a) FROM Admin a WHERE a.username = :u AND a.email = :e AND a.password = :p AND a.role.role = :r",
-                    Long.class)
-                    .setParameter("u", username)
-                    .setParameter("e", email)
-                    .setParameter("p", password)
-                    .setParameter("r", "Admin")
-                    .getSingleResult();
-        } else {
-            count = em.createQuery(
-                    "SELECT COUNT(u) FROM User u WHERE u.username = :u AND u.email = :e AND u.password = :p AND u.role.role = :r",
-                    Long.class)
-                    .setParameter("u", username)
-                    .setParameter("e", email)
-                    .setParameter("p", password)
-                    .setParameter("r", "Customer")
-                    .getSingleResult();
+    public boolean validateLogin(String username, String email, String password, String roleName) {
+        try {
+            Long count;
+            if (roleName.equalsIgnoreCase("admin")) {
+                count = em.createQuery(
+                        "SELECT COUNT(a) FROM Admin a WHERE a.username = :u AND a.email = :e AND a.password = :p AND a.role.role = :r",
+                        Long.class)
+                        .setParameter("u", username)
+                        .setParameter("e", email)
+                        .setParameter("p", password)
+                        .setParameter("r", "Admin")
+                        .getSingleResult();
+            } else {
+                count = em.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.username = :u AND u.email = :e AND u.password = :p AND u.role.role = :r",
+                        Long.class)
+                        .setParameter("u", username)
+                        .setParameter("e", email)
+                        .setParameter("p", password)
+                        .setParameter("r", "Customer")
+                        .getSingleResult();
+            }
+            return count > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return count > 0;
-    } catch (Exception e) {
-        e.printStackTrace();
-        return false;
     }
-}
-
-
 }

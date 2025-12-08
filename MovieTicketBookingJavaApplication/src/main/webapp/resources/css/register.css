@@ -1,0 +1,143 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+
+/* ---------- BODY & CONTAINER ---------- */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f0f8ff, #e0f7fa);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+/* ---------- CARD (SMALLER PANEL) ---------- */
+.auth-card {
+    background: #ffffff;
+    border-radius: 10px;
+    width: 320px;
+    max-width: 90%;
+    padding: 25px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-header h2 {
+    font-size: 22px;
+    color: #007bff;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+}
+
+.auth-header p {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0;
+}
+
+/* ---------- FORM & INPUTS ---------- */
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.input-field {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0,123,255,0.2);
+}
+
+/* ---------- FORGOT PASSWORD (CORRECT FORMAT) ---------- */
+.forgot-password-container {
+    text-align: right;
+    margin-top: -5px;
+    margin-bottom: 15px;
+}
+
+.forgot-link {
+    font-size: 11px;
+    color: #dc3545;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.forgot-link:hover {
+    color: #a71d2a;
+    text-decoration: underline;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn-register {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.2);
+}
+
+.btn-register:hover {
+    background: linear-gradient(135deg, #0056b3, #007bff);
+    transform: translateY(-1px);
+}
+
+/* ---------- FOOTER ---------- */
+.auth-footer {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 15px;
+    color: #757575;
+}
+
+.login-link {
+    color: #28a745;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 11px;
+    display: block;
+    margin-top: 3px;
+    margin-bottom: 8px;
+}

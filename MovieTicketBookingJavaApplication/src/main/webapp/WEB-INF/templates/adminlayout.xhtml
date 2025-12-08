@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+
+    <h:head>
+        <title><ui:insert name="title">Superadmin Panel</ui:insert></title>
+        <h:outputStylesheet library="css" name="admin-style.css" />
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    </h:head>
+
+    <h:body>
+
+        <div id="wrapper">
+
+            <!-- SIDEBAR -->
+            <aside id="sidebar-wrapper" class="expanded">
+                <div class="sidebar-heading">
+                    <span class="logo-text">🎬 Superadmin</span>
+                </div>
+
+                <nav class="list-group">
+
+                    <h:link outcome="/admin/Admin_panel" styleClass="list-group-item">
+                        <i class="fa fa-tachometer-alt icon"></i><span>Dashboard</span>
+                    </h:link>
+
+                    <h:link outcome="/admin/add_movie" styleClass="list-group-item">
+                        <i class="fa fa-film icon"></i><span>Manage Movies</span>
+                    </h:link>
+
+                    <h:link outcome="/admin/admin_screens" styleClass="list-group-item">
+                        <i class="fa fa-tv icon"></i><span>Manage Screens</span>
+                    </h:link>
+
+                    <h:link outcome="/admin/admin_theaters" styleClass="list-group-item">
+                        <i class="fa fa-building icon"></i><span>Manage Theaters</span>
+                    </h:link>
+
+                    <h:link outcome="/admin/admin_shows" styleClass="list-group-item">
+                        <i class="fa fa-users icon"></i><span>Manage Shows</span>
+                    </h:link>
+
+                    <h:link outcome="/admin/admin_screens" styleClass="list-group-item">
+                        <i class="fa fa-user-shield icon"></i><span>Manage Roles</span>
+                    </h:link>
+                    <h:link outcome="/superadmin/superdashboard" styleClass="list-group-item">
+                        <i class="fa fa-user-plus icon"></i><span>Add User</span>
+                    </h:link>
+
+
+                </nav>
+            </aside>
+
+            <!-- MAIN -->
+            <main id="page-content-wrapper">
+
+                <!-- NAVBAR -->
+                <header class="navbar">
+                    <button id="toggle-btn">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <div class="navbar-title">
+                        <ui:insert name="title">Dashboard</ui:insert>
+                    </div>
+
+                    <div class="navbar-profile">
+                        Welcome, #{userAuthBean.username}
+
+                        <h:form style="display:inline;">
+                            <h:commandLink action="#{userAuthBean.logout}" styleClass="logout-btn">
+                                <i class="fa fa-sign-out-alt"></i> Logout
+                            </h:commandLink>
+                        </h:form>
+                    </div>
+                </header>
+
+                <!-- PAGE CONTENT -->
+                <section class="container-fluid">
+                    <ui:insert name="content" />
+                </section>
+
+                <footer>
+                    <h:outputText value="© #{java.time.Year.now().getValue()} Superadmin Panel" />
+                    <script>
+                        function openModal() {
+                            document.getElementById("modal").style.display = "flex";
+                        }
+                        function closeModal() {
+                            document.getElementById("modal").style.display = "none";
+                        }
+                    </script>
+
+                </footer>
+
+            </main>
+        </div>
+
+        <script>
+            document.getElementById("toggle-btn").addEventListener("click", function () {
+                document.getElementById("sidebar-wrapper").classList.toggle("collapsed");
+                document.getElementById("page-content-wrapper").classList.toggle("full");
+            });
+        </script>
+
+    </h:body>
+</html>
