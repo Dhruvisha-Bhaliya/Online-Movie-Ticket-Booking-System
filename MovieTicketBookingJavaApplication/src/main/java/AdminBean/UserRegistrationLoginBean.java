@@ -9,6 +9,7 @@ import entity.User;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.math.BigInteger;
 import java.util.Date;
 import util.PasswordUtil;
 
@@ -29,7 +30,7 @@ public class UserRegistrationLoginBean implements UserRegistrationLoginBeanLocal
             u.setUsername(username);
             u.setEmail(email);
             u.setPassword(password);
-            u.setPhoneno(phone);
+            u.setPhoneno(BigInteger.valueOf(phone));
             u.setStatus("active");
             u.setCreatedAt(new Date());
             u.setUpdatedAt(new Date());

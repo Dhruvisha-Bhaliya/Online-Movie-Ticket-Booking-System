@@ -9,6 +9,7 @@ import entity.RoleMaster;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import util.PasswordUtil;
@@ -34,9 +35,9 @@ public class AllAdminLogin implements AllAdminLoginLocal {
 
             PasswordUtil util = new PasswordUtil();
             if (util.verifyPassword(password, admin.getPassword())) {
-                return admin;  
+                return admin;
             } else {
-                return null;    
+                return null;
             }
 
         } catch (Exception e) {
@@ -63,7 +64,7 @@ public class AllAdminLogin implements AllAdminLoginLocal {
         a.setUsername(name);
         a.setEmail(email);
         a.setPassword(new PasswordUtil().hashPassword(password));
-        a.setPhoneno(phone);
+        a.setPhoneno(BigInteger.valueOf(phone));
         a.setRole(role);
         a.setStatus("active");
         a.setCreatedAt(new Date());
