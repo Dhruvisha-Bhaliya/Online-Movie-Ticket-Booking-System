@@ -4,6 +4,7 @@
  */
 package entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -93,6 +94,7 @@ public class Booking implements Serializable {
     @ManyToOne(optional = false)
     private User userId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "bookingId")
+    @JsonbTransient
     private Collection<Payment> paymentCollection;
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
@@ -254,8 +256,7 @@ public class Booking implements Serializable {
         this.updatedAt = new Date();
     }
 
-    
-    public enum Status{
+    public enum Status {
         active, pending, blocked;
     }
 }

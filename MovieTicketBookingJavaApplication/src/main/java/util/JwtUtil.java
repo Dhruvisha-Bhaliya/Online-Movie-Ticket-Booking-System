@@ -19,7 +19,7 @@ public class JwtUtil {
 
    private static final String SECRET_KEY_STRING = "your_super_secret_key_123456789012345678901234567890";
     private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(SECRET_KEY_STRING.getBytes());
-    private static final long EXPIRATION_TIME = 86400000;
+    private static final long EXPIRATION_TIME = 900000;
 
     public static String generateToken(String email, String roleName) {
         return Jwts.builder()

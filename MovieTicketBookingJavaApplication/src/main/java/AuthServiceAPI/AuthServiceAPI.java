@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,17 +32,21 @@ import util.PasswordUtil;
 public class AuthServiceAPI {
 
     @PersistenceContext(unitName = "myMovie")
-    private EntityManager em;
+    private EntityManager em; // Only kept for RoleMaster lookup
 
     @EJB
     private AdminServiceLocal adminService;
 
     @EJB
-    private UserServiceLocal userService;
+    private UserServiceLocal userService; // Inject the User Service
 
     private static final String EMAIL_DOMAIN = "cinemaxhub.com";
     private final PasswordUtil passwordUtil = new PasswordUtil();
 
+    // ==========================================================
+    // ⭐ CORE HELPERS (Role lookup and Email generation)
+    // ==========================================================
+    // Finds the RoleMaster entity from the database (Persistence logic)
     private RoleMaster findRoleByName(String roleName) {
         try {
             TypedQuery<RoleMaster> q = em.createQuery(
@@ -89,10 +94,12 @@ public class AuthServiceAPI {
         return base + suffix + EMAIL_DOMAIN;
     }
 
+    // Ensures email is unique by appending an index if a conflict is found in either table
     private String ensureUniqueEmail(String candidate) {
         String email = candidate;
         int i = 1;
         while (adminService.findByEmail(email) != null || userService.findByEmail(email) != null) {
+            // Logic to correctly append index (same as your original logic)
             int at = candidate.indexOf("@");
             String left = candidate.substring(0, at);
             String right = candidate.substring(at);
@@ -118,6 +125,7 @@ public class AuthServiceAPI {
     // ==========================================================
     // 🛡️ ADMIN MANAGEMENT (CRUD)
     // ==========================================================
+    // 1. REGISTER ADMIN (Hierarchical Creation)
     public ApiResponse<Map<String, Object>> registerAdmin(Admin admin, String creatorAuthHeader) {
         try {
             if (admin == null || admin.getUsername() == null || admin.getUsername().isEmpty()) {
@@ -159,6 +167,8 @@ public class AuthServiceAPI {
                     return new ApiResponse<>(false, 403, "Creator cannot create any more admin roles.", null);
                 }
             }
+
+            // Generate unique email
             String candidate = generateRoleEmail(admin.getUsername(), assignRole);
             String finalEmail = ensureUniqueEmail(candidate);
 
@@ -166,14 +176,17 @@ public class AuthServiceAPI {
             if (roleEntity == null) {
                 return new ApiResponse<>(false, 500, "Role not found: " + assignRole, null);
             }
+
+            // Set mandatory fields
             admin.setRole(roleEntity);
             admin.setEmail(finalEmail);
             admin.setPassword(PasswordUtil.hashPassword(admin.getPassword()));
             admin.setStatus(admin.getStatus() == null || admin.getStatus().isEmpty() ? "active" : admin.getStatus());
             admin.setCreatedAt(new Date());
             admin.setUpdatedAt(new Date());
+            // phoneno is already set by JAX-RS unmarshalling or is null
 
-            adminService.addadmin(admin);
+            adminService.addadmin(admin); // Persistence delegated
 
             String token = JwtUtil.generateToken(admin.getEmail(), roleEntity.getRole());
             Map<String, Object> data = new HashMap<>();
@@ -188,12 +201,13 @@ public class AuthServiceAPI {
         }
     }
 
+    // 2. LOGIN ADMIN
     public ApiResponse<Map<String, Object>> loginAdmin(String email, String password) {
         try {
             if (!isValidEmail(email)) {
                 return new ApiResponse<>(false, 400, "Invalid email format", null);
             }
-            Admin a = adminService.findByEmail(email);
+            Admin a = adminService.findByEmail(email); // Persistence delegated
             if (a == null) {
                 return new ApiResponse<>(false, 404, "Admin not found", null);
             }
@@ -218,6 +232,7 @@ public class AuthServiceAPI {
         }
     }
 
+    // 3. UPDATE ADMIN PROFILE
     public ApiResponse<Admin> updateAdminProfile(Admin updatedAdmin, String authHeader) {
         String token = JwtUtil.getTokenFromHeader(authHeader);
         if (token == null || !JwtUtil.validateToken(token)) {
@@ -231,15 +246,16 @@ public class AuthServiceAPI {
         }
 
         try {
+            // Business rule: Allow self-update of username and phone number
             if (updatedAdmin.getUsername() != null && !updatedAdmin.getUsername().isEmpty()) {
                 existingAdmin.setUsername(updatedAdmin.getUsername());
             }
-            if (updatedAdmin.getPhoneno() != null && updatedAdmin.getPhoneno() != 0L) {
-                existingAdmin.setPhoneno(updatedAdmin.getPhoneno());
+            if (updatedAdmin.getPhoneno() != null && updatedAdmin.getPhoneno().compareTo(BigInteger.ZERO) != 0) {
+                updatedAdmin.setPhoneno(updatedAdmin.getPhoneno());
             }
             existingAdmin.setUpdatedAt(new Date());
 
-            Admin mergedAdmin = adminService.updateAdmin(existingAdmin);
+            Admin mergedAdmin = adminService.updateAdmin(existingAdmin); // Persistence delegated
 
             return new ApiResponse<>(true, 200, "Admin profile updated successfully.", mergedAdmin);
         } catch (Exception e) {
@@ -247,6 +263,7 @@ public class AuthServiceAPI {
         }
     }
 
+    // 4. UPDATE ADMIN PASSWORD
     public ApiResponse<Map<String, Object>> updateAdminPassword(String oldPassword, String newPassword, String authHeader) {
         String token = JwtUtil.getTokenFromHeader(authHeader);
         if (token == null || !JwtUtil.validateToken(token)) {
@@ -268,7 +285,7 @@ public class AuthServiceAPI {
         try {
             admin.setPassword(PasswordUtil.hashPassword(newPassword));
             admin.setUpdatedAt(new Date());
-            adminService.updateAdmin(admin);
+            adminService.updateAdmin(admin); // Persistence delegated
 
             return new ApiResponse<>(true, 200, "Admin Password updated successfully.", null);
         } catch (Exception e) {
@@ -276,6 +293,7 @@ public class AuthServiceAPI {
         }
     }
 
+    // 5. DELETE ADMIN ACCOUNT (Self-Deactivation/Soft Delete)
     public ApiResponse<String> deleteAdmin(String authHeader) {
         String token = JwtUtil.getTokenFromHeader(authHeader);
         if (token == null || !JwtUtil.validateToken(token)) {
@@ -290,7 +308,7 @@ public class AuthServiceAPI {
         }
 
         try {
-            adminService.deleteAdmin(adminToDelete);
+            adminService.deleteAdmin(adminToDelete);   // ← REAL DELETE
             return new ApiResponse<>(true, 200, "Admin account deleted successfully.", null);
 
         } catch (Exception e) {
@@ -298,9 +316,10 @@ public class AuthServiceAPI {
         }
     }
 
+// ==========================================================
+    // 👤 USER MANAGEMENT (CRUD)
     // ==========================================================
-    // USER MANAGEMENT (CRUD)
-    // ==========================================================
+    // 1. REGISTER USER (Customer)
     public ApiResponse<Map<String, Object>> registerUser(User user) {
         try {
             if (user == null || user.getUsername() == null || user.getUsername().isEmpty()) {
@@ -327,7 +346,7 @@ public class AuthServiceAPI {
             user.setCreatedAt(new Date());
             user.setUpdatedAt(new Date());
 
-            userService.addUser(user);
+            userService.addUser(user); // Persistence delegated
 
             String token = JwtUtil.generateToken(user.getEmail(), role.getRole());
             Map<String, Object> data = new HashMap<>();
@@ -342,12 +361,13 @@ public class AuthServiceAPI {
         }
     }
 
+    // 2. LOGIN USER
     public ApiResponse<Map<String, Object>> loginUser(String email, String password) {
         try {
             if (!isValidEmail(email)) {
                 return new ApiResponse<>(false, 400, "Invalid email format", null);
             }
-            User u = userService.findByEmail(email);
+            User u = userService.findByEmail(email); // Persistence delegated
             if (u == null) {
                 return new ApiResponse<>(false, 404, "User not found", null);
             }
@@ -371,6 +391,7 @@ public class AuthServiceAPI {
         }
     }
 
+    // 3. UPDATE USER PROFILE
     public ApiResponse<User> updateUserProfile(User updatedUser, String authHeader) {
         String token = JwtUtil.getTokenFromHeader(authHeader);
         if (token == null || !JwtUtil.validateToken(token)) {
@@ -384,15 +405,16 @@ public class AuthServiceAPI {
         }
 
         try {
+            // Business rule: Allow self-update of username and phone number
             if (updatedUser.getUsername() != null && !updatedUser.getUsername().isEmpty()) {
                 existingUser.setUsername(updatedUser.getUsername());
             }
-            if (updatedUser.getPhoneno() != null && updatedUser.getPhoneno() != 0L) {
+            if (updatedUser.getPhoneno() != null && updatedUser.getPhoneno().compareTo(BigInteger.ZERO) != 0) {
                 existingUser.setPhoneno(updatedUser.getPhoneno());
             }
             existingUser.setUpdatedAt(new Date());
 
-            User mergedUser = userService.updateUser(existingUser);
+            User mergedUser = userService.updateUser(existingUser); // Persistence delegated
 
             return new ApiResponse<>(true, 200, "User profile updated successfully.", mergedUser);
         } catch (Exception e) {
@@ -400,6 +422,7 @@ public class AuthServiceAPI {
         }
     }
 
+    // 4. UPDATE USER PASSWORD
     public ApiResponse<Map<String, Object>> updateUserPassword(String oldPassword, String newPassword, String authHeader) {
         String token = JwtUtil.getTokenFromHeader(authHeader);
         if (token == null || !JwtUtil.validateToken(token)) {
@@ -421,7 +444,7 @@ public class AuthServiceAPI {
         try {
             user.setPassword(PasswordUtil.hashPassword(newPassword));
             user.setUpdatedAt(new Date());
-            userService.updateUser(user);
+            userService.updateUser(user); // Persistence delegated
 
             return new ApiResponse<>(true, 200, "User Password updated successfully.", null);
         } catch (Exception e) {
@@ -429,6 +452,7 @@ public class AuthServiceAPI {
         }
     }
 
+    // 5. DELETE USER ACCOUNT (Self-Deactivation/Soft Delete)
     public ApiResponse<String> deleteUser(String authHeader) {
         String token = JwtUtil.getTokenFromHeader(authHeader);
         if (token == null || !JwtUtil.validateToken(token)) {
@@ -442,7 +466,8 @@ public class AuthServiceAPI {
         }
 
         try {
-            userService.deleteUser(userToDelete);
+            // Soft Delete: Deactivate the account
+            userService.deleteUser(userToDelete);   // ← REAL DELETE
 
             return new ApiResponse<>(true, 200, "User account deactivated successfully.", null);
         } catch (Exception e) {

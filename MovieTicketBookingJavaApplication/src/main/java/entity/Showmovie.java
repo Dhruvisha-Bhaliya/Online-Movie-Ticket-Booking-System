@@ -4,6 +4,7 @@
  */
 package entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -63,8 +64,10 @@ public class Showmovie implements Serializable {
     @Column(name = "status")
     private String status;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "showId")
+    @JsonbTransient
     private Collection<Booking> bookingCollection;
     @JoinColumn(name = "movie_id", referencedColumnName = "movie_id")
+    @JsonbTransient
     @ManyToOne
     private Movie movieId;
     @JoinColumn(name = "screen_id", referencedColumnName = "screen_id")
@@ -172,5 +175,5 @@ public class Showmovie implements Serializable {
     public String toString() {
         return "entity.Showmovie[ showId=" + showId + " ]";
     }
-    
+
 }

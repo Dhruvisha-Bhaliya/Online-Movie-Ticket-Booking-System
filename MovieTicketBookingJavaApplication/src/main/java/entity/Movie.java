@@ -4,6 +4,7 @@
  */
 package entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -15,6 +16,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -52,6 +55,7 @@ public class Movie implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "movie_id")
+    @JsonbTransient
     private Long movieId;
     @Basic(optional = false)
     @NotNull
@@ -119,10 +123,12 @@ public class Movie implements Serializable {
     @Size(max = 7)
     @Column(name = "status")
     private String status;
-    @OneToMany(mappedBy = "movieId")
-    private Collection<Showmovie> showmovieCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "movieId")
+    @JsonbTransient
     private Collection<Feedback> feedbackCollection;
+    @OneToMany(mappedBy = "movieId")
+    @JsonbTransient
+    private Collection<Showmovie> showmovieCollection;
 
     public Movie() {
     }
@@ -308,5 +314,16 @@ public class Movie implements Serializable {
     public String toString() {
         return "entity.Movie[ movieId=" + movieId + " ]";
     }
-    
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+        this.status = "ACTIVE";   // ✔️ String, not enum
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = new Date();
+    }
 }

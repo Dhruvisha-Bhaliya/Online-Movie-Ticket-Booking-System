@@ -91,8 +91,6 @@ public class ShowResource {
             if (existing == null) {
                 return ResponseFormatter.error(404, "Show not found", null);
             }
-
-            existing.setBasePrice(updatedData.getBasePrice());
             existing.setShowTime(updatedData.getShowTime());
             existing.setMovieId(updatedData.getMovieId());
             existing.setScreenId(updatedData.getScreenId());
