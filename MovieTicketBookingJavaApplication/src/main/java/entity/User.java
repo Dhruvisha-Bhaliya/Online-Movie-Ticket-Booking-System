@@ -22,12 +22,13 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "user")
@@ -39,7 +40,8 @@ import java.util.Date;
     @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email"),
     @NamedQuery(name = "User.findByCreatedAt", query = "SELECT u FROM User u WHERE u.createdAt = :createdAt"),
     @NamedQuery(name = "User.findByUpdatedAt", query = "SELECT u FROM User u WHERE u.updatedAt = :updatedAt"),
-    @NamedQuery(name = "User.findByStatus", query = "SELECT u FROM User u WHERE u.status = :status")})
+    @NamedQuery(name = "User.findByStatus", query = "SELECT u FROM User u WHERE u.status = :status"),
+    @NamedQuery(name = "User.findByPhoneno", query = "SELECT u FROM User u WHERE u.phoneno = :phoneno")})
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -77,15 +79,15 @@ public class User implements Serializable {
     @Size(max = 7)
     @Column(name = "status")
     private String status;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private Collection<Feedback> feedbackCollection;
+    @Column(name = "phoneno")
+    private BigInteger phoneno;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
     private Collection<Booking> bookingCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
+    private Collection<Feedback> feedbackCollection;
     @JoinColumn(name = "role", referencedColumnName = "role_id")
     @ManyToOne(optional = false)
     private RoleMaster role;
-    @Column(name = "phoneno")
-    private Long phoneno;
 
     public User() {
     }
@@ -159,12 +161,12 @@ public class User implements Serializable {
         this.status = status;
     }
 
-    public Collection<Feedback> getFeedbackCollection() {
-        return feedbackCollection;
+    public BigInteger getPhoneno() {
+        return phoneno;
     }
 
-    public void setFeedbackCollection(Collection<Feedback> feedbackCollection) {
-        this.feedbackCollection = feedbackCollection;
+    public void setPhoneno(BigInteger phoneno) {
+        this.phoneno = phoneno;
     }
 
     public Collection<Booking> getBookingCollection() {
@@ -175,20 +177,20 @@ public class User implements Serializable {
         this.bookingCollection = bookingCollection;
     }
 
+    public Collection<Feedback> getFeedbackCollection() {
+        return feedbackCollection;
+    }
+
+    public void setFeedbackCollection(Collection<Feedback> feedbackCollection) {
+        this.feedbackCollection = feedbackCollection;
+    }
+
     public RoleMaster getRole() {
         return role;
     }
 
     public void setRole(RoleMaster role) {
         this.role = role;
-    }
-
-    public Long getPhoneno() {
-        return phoneno;
-    }
-
-    public void setPhoneno(Long phoneno) {
-        this.phoneno = phoneno;
     }
 
     @Override
@@ -215,5 +217,5 @@ public class User implements Serializable {
     public String toString() {
         return "entity.User[ userId=" + userId + " ]";
     }
-
+    
 }

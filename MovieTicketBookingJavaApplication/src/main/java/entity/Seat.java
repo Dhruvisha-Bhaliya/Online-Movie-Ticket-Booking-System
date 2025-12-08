@@ -4,7 +4,6 @@
  */
 package entity;
 
-import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +26,7 @@ import java.util.Date;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "seat")
@@ -75,12 +74,13 @@ public class Seat implements Serializable {
     @Column(name = "status")
     private String status;
     @ManyToMany(mappedBy = "seatCollection")
-    @JsonbTransient
     private Collection<Booking> bookingCollection;
     @JoinColumn(name = "screen_id", referencedColumnName = "screen_id")
     @ManyToOne(optional = false)
-    @JsonbTransient
     private Screen screenId;
+    @JoinColumn(name = "category_id", referencedColumnName = "category_id")
+    @ManyToOne
+    private SeatCategory categoryId;
 
     public Seat() {
     }
@@ -168,6 +168,14 @@ public class Seat implements Serializable {
 
     public void setScreenId(Screen screenId) {
         this.screenId = screenId;
+    }
+
+    public SeatCategory getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(SeatCategory categoryId) {
+        this.categoryId = categoryId;
     }
 
     @Override

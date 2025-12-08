@@ -26,14 +26,12 @@
 
             <div class="navbar-right">
                 <h:form id="searchForm">
-                    <!-- Search input with AJAX to show live suggestions -->
                     <h:inputText id="searchBox" styleClass="search-box"
                                  value="#{searchController.searchQuery}"
                                 
                                  onkeyup="jsf.ajax.request(this, event, {execute: 'searchBox', render: 'suggestions'});" 
                                  />
-
-                    <!-- Suggestions dropdown -->
+                    
                     <h:panelGroup id="suggestions" layout="block" styleClass="suggestion-box"
                                   rendered="#{not empty searchController.filteredMovies}">
                         <ui:repeat value="#{searchController.filteredMovies}" var="movie">
@@ -44,7 +42,6 @@
                         </ui:repeat>
                     </h:panelGroup>
 
-                    <!-- Normal search button (redirects to detail if exact match) -->
                     <h:commandButton value="Search"
                                      styleClass="search-button"
                                      action="#{searchController.performSearch()}" />
@@ -62,6 +59,7 @@
                     <h2>Welcome to the Movie Booking System!</h2>
                     <p>This is where the main content (e.g., list of movies) will go.</p>
                 </div>-->
+        
         <!-- 🔁 Image Slider Section -->
         <div class="hero-slider">
             <ui:repeat value="#{adminMovieController.movieList}" var="m" begin="0" end="1" varStatus="loop">

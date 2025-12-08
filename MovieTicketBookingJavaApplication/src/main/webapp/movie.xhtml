@@ -7,23 +7,22 @@
     <h:head>
         <title>All Movies - MovieBooker</title>
         <style>
-            /* --- Page Layout --- */
             .page-container {
                 display: flex;
-                max-width: 1200px; /* Max width for central alignment */
+                max-width: 1200px;
                 margin: 20px auto;
                 padding: 0 20px;
             }
 
             .filter-sidebar {
-                width: 250px; /* Fixed width for the sidebar */
+                width: 250px; 
                 padding-right: 30px;
                 border-right: 1px solid #eee;
-                flex-shrink: 0; /* Prevents sidebar from shrinking */
+                flex-shrink: 0; 
             }
 
             .main-content {
-                flex-grow: 1; /* Takes up the remaining space */
+                flex-grow: 1;
                 padding-left: 30px;
             }
 
@@ -33,7 +32,6 @@
                 margin-bottom: 25px;
             }
 
-            /* --- Filter Styles --- */
             .filter-group {
                 margin-bottom: 30px;
             }
@@ -52,7 +50,7 @@
             }
 
             .filter-tag {
-                display: block; /* Make it a block element to act like a button */
+                display: block; 
                 padding: 8px 15px;
                 border: 1px solid #ccc;
                 border-radius: 20px;
@@ -69,9 +67,8 @@
                 border-color: #aaa;
             }
 
-            /* Style for selected tags (you can add logic in JSF to apply a 'selected' class) */
             .filter-tag.selected {
-                background-color: #d1f2ff; /* Light blue background for active filter */
+                background-color: #d1f2ff; 
                 border-color: #007bff;
                 color: #007bff;
                 font-weight: bold;
@@ -82,15 +79,13 @@
                 border-color: #e74c3c;
             }
 
-            /* --- Movie Grid Styles (from previous step, but ensure it works here) --- */
             .movies-grid {
                 display: grid;
-                /* Adjust for 4 columns in the main content area */
                 grid-template-columns: repeat(4, 1fr);
                 gap: 30px;
             }
 
-            /* Note: Ensure your existing .movie-card styles are included! */
+         
         </style>
     </h:head>
     <h:body>

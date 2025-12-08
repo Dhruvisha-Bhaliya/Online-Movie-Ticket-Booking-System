@@ -21,7 +21,7 @@ import java.util.Collection;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "role_master")

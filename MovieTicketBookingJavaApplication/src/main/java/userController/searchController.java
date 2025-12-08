@@ -28,12 +28,11 @@ public class searchController implements Serializable {
     private String searchQuery;
     private List<Movie> filteredMovies;
 
-    // Called every time user types something
     public void updateSuggestions() {
         filteredMovies = movieBean.searchMovie(searchQuery);
     }
 
-    // When user selects a movie
+ 
     public void goToMovieDetail(Long movieId) throws IOException {
         FacesContext.getCurrentInstance().getExternalContext()
                 .redirect("MovieDetail.xhtml?movieId=" + movieId);
@@ -41,7 +40,7 @@ public class searchController implements Serializable {
 
     public String performSearch() throws IOException {
         if (filteredMovies != null && !filteredMovies.isEmpty()) {
-            // Redirect to the first matched movie
+           
             Long movieId = filteredMovies.get(0).getMovieId();
             FacesContext.getCurrentInstance().getExternalContext()
                     .redirect("MovieDetail.xhtml?movieId=" + movieId);
@@ -57,8 +56,6 @@ public class searchController implements Serializable {
          updateSuggestions(); 
         this.searchQuery = searchQuery;
     }
-
-   
 
     public List<Movie> getFilteredMovies() {
         return filteredMovies;

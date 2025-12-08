@@ -3,183 +3,182 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core">
-    <h:head>
-        <title>#{movieDetailController.currentMovie.movieTitle} - Movie Details</title>
-        <style>
-        /* New CSS file: detail.css */
-
-        /* Dark overlay hero section */
-        .detail-hero {
-            position: relative;
-            width: 100%;
-            height: 60vh; /* Adjust height as needed */
-            background-size: cover;
-            background-position: top center;
-            /* Dark overlay for text readability - Adjust opacity if needed */
-            box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.6); 
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .detail-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            gap: 40px;
-            /* Align content to the bottom of the container, then pull it up */
-            align-items: flex-end; 
-            padding: 0 30px;
-            position: relative;
-            top: 100%; /* Start at the bottom of the hero */
-            transform: translateY(-100%); /* Pull content up by its full height */
-        }
-
-        .poster-small img {
-            width: 200px; /* Smaller poster size for the details page */
-            height: 290px;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-
-        .info {
-            flex-grow: 1;
-            padding-bottom: 20px; /* Add padding below info to visually separate it from the bottom */
-        }
-
-        .info h1 {
-            font-size: 3rem;
-            margin-bottom: 5px;
-        }
-
-        .languages {
-            font-size: 1.1rem;
-            color: #ccc;
-            margin-bottom: 20px;
-        }
-
-        .rating-info {
-            display: flex;
-            align-items: center;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-
-        .rating-large {
-            font-weight: bold;
-            color: #38c172; /* Green for rating */
-            margin-right: 15px;
-        }
-
-        .votes-large {
-            color: #c0c0c0;
-            font-size: 1rem;
-        }
-
-        .pipe {
-            margin: 0 15px;
-            color: #999;
-        }
-
-        .genre-details {
-            font-size: 1rem;
-            color: #ddd;
-        }
-
-        .action-buttons {
-            margin-top: 30px;
-        }
-
-        .btn-booking {
-            background-color: #f84464; /* BookMyShow's signature button color */
-            color: white;
-            padding: 12px 30px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-            display: inline-block;
-            transition: background-color 0.3s;
-        }
-
-        .btn-booking:hover {
-            background-color: #d1304d;
-        }
-
-        /* General Content Section */
-        .detail-section {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 30px;
-        }
-
-        .detail-section h2 {
-            font-size: 24px;
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .detail-section p {
-            color: #555;
-            line-height: 1.6;
-        }
-    </style>
-    </h:head>
-    <h:body>
+    <f:view>
         <f:metadata>
             <f:viewParam name="movieId" value="#{movieDetailController.movieId}" required="true"/>
-            
+
         </f:metadata>
-        <h:panelGroup rendered="#{movieDetailController.currentMovie != null}">
+        <h:head>
+            <title>#{movieDetailController.currentMovie.movieTitle} - Movie Details</title>
+            <style>
+             
+                .detail-hero {
+                    position: relative;
+                    width: 100%;
+                    height: 60vh;
+                    background-size: cover;
+                    background-position: top center;
+                    box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.6);
+                    color: white;
+                    margin-bottom: 30px;
+                }
 
-            <h:messages globalOnly="true" style="color: red;"/>
+                .detail-content {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    display: flex;
+                    gap: 40px;
+                    align-items: flex-end;
+                    padding: 0 30px;
+                    position: relative;
+                    top: 100%;
+                    transform: translateY(-100%);
+                }
 
-            <div class="detail-hero" 
-                 style="background-image: url('#{resource['images/' += movieDetailController.currentMovie.posterImagePath]}');">
+                .poster-small img {
+                    width: 200px;
+                    height: 290px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+                }
 
-                <div class="detail-content">
-                    <div class="poster-small">
-                        <h:graphicImage library="images" name="#{movieDetailController.currentMovie.posterImagePath}" 
-                                        alt="#{movieDetailController.currentMovie.movieTitle}"/>
-                    </div>
-                    <div class="info">
-                        <h1>#{movieDetailController.currentMovie.movieTitle}</h1>
-                        <p class="languages">#{movieDetailController.currentMovie.languages}</p>
-                        <div class="rating-info">
-                            <span class="rating-large">⭐ #{movieDetailController.currentMovie.avgRating}/10</span>
-                            <span class="votes-large">#{movieDetailController.currentMovie.voteCount}+ Votes</span>
-                            <span class="pipe">|</span>
-                            <span class="genre-details">
-                                #{movieDetailController.currentMovie.genre}, #{movieDetailController.currentMovie.subGenres} 
-                                | #{movieDetailController.currentMovie.durationMin}m
-                            </span>
+                .info {
+                    flex-grow: 1;
+                    padding-bottom: 20px;
+                }
+
+                .info h1 {
+                    font-size: 3rem;
+                    margin-bottom: 5px;
+                }
+
+                .languages {
+                    font-size: 1.1rem;
+                    color: #ccc;
+                    margin-bottom: 20px;
+                }
+
+                .rating-info {
+                    display: flex;
+                    align-items: center;
+                    font-size: 1.2rem;
+                    margin-bottom: 20px;
+                }
+
+                .rating-large {
+                    font-weight: bold;
+                    color: #38c172; 
+                    margin-right: 15px;
+                }
+
+                .votes-large {
+                    color: #c0c0c0;
+                    font-size: 1rem;
+                }
+
+                .pipe {
+                    margin: 0 15px;
+                    color: #999;
+                }
+
+                .genre-details {
+                    font-size: 1rem;
+                    color: #ddd;
+                }
+
+                .action-buttons {
+                    margin-top: 30px;
+                }
+
+                .btn-booking {
+                    background-color: #f84464; 
+                    color: white;
+                    padding: 12px 30px;
+                    border-radius: 6px;
+                    text-decoration: none;
+                    font-weight: bold;
+                    display: inline-block;
+                    transition: background-color 0.3s;
+                }
+
+                .btn-booking:hover {
+                    background-color: #d1304d;
+                }
+
+                .detail-section {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px 30px;
+                }
+
+                .detail-section h2 {
+                    font-size: 24px;
+                    color: #333;
+                    border-bottom: 2px solid #eee;
+                    padding-bottom: 10px;
+                    margin-bottom: 15px;
+                }
+
+                .detail-section p {
+                    color: #555;
+                    line-height: 1.6;
+                }
+            </style>
+        </h:head>
+
+        <h:body>
+
+            <h:panelGroup rendered="#{movieDetailController.currentMovie != null}">
+
+                <h:messages globalOnly="true" style="color: red;"/>
+
+                <div class="detail-hero" 
+                     style="background-image: url('#{resource['images/' += movieDetailController.currentMovie.posterImagePath]}');">
+
+                    <div class="detail-content">
+                        <div class="poster-small">
+                            <h:graphicImage library="images" name="#{movieDetailController.currentMovie.posterImagePath}" 
+                                            alt="#{movieDetailController.currentMovie.movieTitle}"/>
                         </div>
+                        <div class="info">
+                            <h1>#{movieDetailController.currentMovie.movieTitle}</h1>
+                            <p class="languages">#{movieDetailController.currentMovie.languages}</p>
+                            <div class="rating-info">
+                                <span class="rating-large">⭐ #{movieDetailController.currentMovie.avgRating}/10</span>
+                                <span class="votes-large">#{movieDetailController.currentMovie.voteCount}+ Votes</span>
+                                <span class="pipe">|</span>
+                                <span class="genre-details">
+                                    #{movieDetailController.currentMovie.genre}, #{movieDetailController.currentMovie.subGenres} 
+                                    | #{movieDetailController.currentMovie.durationMin}m
+                                </span>
+                            </div>
 
-                        <div class="action-buttons">
-                            <h:link outcome="booking" styleClass="btn-booking">
-                                 <f:param name="movieId" value="#{movieDetailController.movieId}" />
-                                Book Tickets (Price: ₹#{movieDetailController.currentMovie.ticketPrice})
-                            </h:link>
+                            <div class="action-buttons">
+                                <h:link outcome="booking" styleClass="btn-booking">
+                                    <f:param name="movieId" value="#{movieDetailController.currentMovie.movieId}" />
+                                    Book Tickets (Price: ₹#{movieDetailController.currentMovie.ticketPrice})
+                                </h:link>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="detail-section">
-                <h2>About the movie</h2>
-                <p>#{movieDetailController.currentMovie.description}</p>
-            </div>
+                <div class="detail-section">
+                    <h2>About the movie</h2>
+                    <p>#{movieDetailController.currentMovie.description}</p>
+                </div>
 
-            <div class="detail-section">
-                <h2>Cast - Crew</h2>
-                <p>#{movieDetailController.currentMovie.castCrew}</p>
-            </div>
+                <div class="detail-section">
+                    <h2>Cast - Crew</h2>
+                    <p>#{movieDetailController.currentMovie.castCrew}</p>
+                </div>
 
-        </h:panelGroup>
+            </h:panelGroup>
 
-        <h:panelGroup rendered="#{movieDetailController.currentMovie == null and movieDetailController.movieId != null}">
-            <p style="text-align: center; margin-top: 50px; font-size: 1.2em; color: #e50914;">Movie not found. Please check the ID.</p>
-        </h:panelGroup>
+            <h:panelGroup rendered="#{movieDetailController.currentMovie == null and movieDetailController.movieId != null}">
+                <p style="text-align: center; margin-top: 50px; font-size: 1.2em; color: #e50914;">Movie not found. Please check the ID.</p>
+            </h:panelGroup>
 
-    </h:body>
+        </h:body>
+    </f:view>
 </html>

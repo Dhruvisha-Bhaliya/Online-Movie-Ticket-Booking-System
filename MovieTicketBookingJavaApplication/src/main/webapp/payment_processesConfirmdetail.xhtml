@@ -1,0 +1,285 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+
+    <h:head>
+        <title>Confirm Booking &amp; Pay</title>
+
+        <style>
+            body {
+                font-family: "Roboto", Arial, sans-serif;
+                background-color: #f7f7f7; 
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+
+            .main-content {
+                width: 100%;
+                max-width: 900px; 
+                background-color: #ffffff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                min-height: 100vh;
+                margin: auto;
+                border-radius:10px;
+            }
+
+            .top-header {
+                background-color: #ffffff;
+                padding: 15px 20px;
+                border-bottom: 1px solid #eeeeee;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .top-header h2 {
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+                color: #1f1f1f;
+            }
+            .back-icon {
+                font-size: 20px;
+                cursor: pointer;
+            }
+
+            .summary-card {
+                padding: 20px;
+                margin-bottom: 10px;
+                background-color: #ffffff;
+                border-bottom: 8px solid #f7f7f7;
+            }
+            .summary-card:last-child {
+                border-bottom: none;
+            }
+
+            .movie-details h3 {
+                font-size: 18px;
+                margin: 0 0 5px 0;
+                font-weight: 600;
+            }
+            .movie-details p {
+                font-size: 13px;
+                color: #666;
+                margin: 0 0 2px 0;
+            }
+            .movie-details strong {
+                color: #1f1f1f;
+            }
+            .m-ticket {
+                color: #f84464;
+                border: 1px solid #f84464;
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-size: 10px;
+                font-weight: bold;
+                margin-left: 10px;
+            }
+
+            .order-details, .user-details {
+                margin-top: 15px;
+            }
+            .order-details h3, .user-details h3 {
+                font-size: 16px;
+                font-weight: 600;
+                margin-top: 15px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #eee;
+            }
+            .price-row, .total-row, .user-row {
+                display: flex;
+                justify-content: space-between;
+                font-size: 14px;
+                padding: 8px 0;
+                align-items: center;
+            }
+
+            .total-row {
+                font-size: 16px;
+                font-weight: bold;
+                color: #1f1f1f;
+                border-top: 1px dashed #ddd;
+                margin-top: 10px;
+                padding-top: 15px;
+            }
+            .convenience-fees-details {
+                font-size: 12px;
+                color: #888;
+                text-align: right;
+            }
+
+            .user-row p {
+                margin: 0;
+            }
+            .user-row .edit-btn {
+                color: #f84464;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .offers-section {
+                padding: 15px 20px;
+                background-color: #ffffff;
+                border-top: 1px solid #eee;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: pointer;
+            }
+            .offers-section span {
+                font-size: 15px;
+                color: #f84464;
+                font-weight: 600;
+            }
+
+            .sticky-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                max-width: 450px;
+                margin: auto;
+                padding: 15px 20px;
+                background-color: #ffffff;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+                border-radius: 0 0 10px 10px;
+            }
+            .pay-btn {
+                width: 100%;
+                background: #f84464;
+                color: white;
+                padding: 15px 0;
+                font-size: 16px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                text-align: center;
+                display: block;
+            }
+
+            #mainForm{
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+        </style>
+    </h:head>
+
+    <h:body>
+        <h:form id="mainForm">
+            <div class="main-content">
+
+                <div class="top-header">
+                    <h:commandLink action="SeatSelection.xhtml" styleClass="back-icon" immediate="true">
+                        &#x2190; </h:commandLink><h2>Confirm Booking</h2>
+                </div>
+
+                <div class="summary-card movie-details">
+                    <h3>
+                        <h:outputText value="#{movieBookingController.selectedMovie.movieTitle}"/>
+                        <span class="m-ticket">M-Ticket</span>
+                    </h3>
+
+                    <p>
+                        <h:outputText value="#{movieBookingController.selectedShow.showTime}">
+                            <f:convertDateTime pattern="EEE, d MMM, yyyy | h:mm a" timeZone="IST"/>
+                        </h:outputText>
+                    </p>
+
+                    <p>
+                        <h:outputText value="#{movieBookingController.selectedShow.screenId.theaterId.theaterName}" escape="true"/>
+                        (SCREEN <h:outputText value="#{movieBookingController.selectedShow.screenId.screenNumber}"/>)
+                    </p>
+
+                    <p>
+                        Seats: <strong><h:outputText value="#{movieBookingController.selectedSeatsAsString}" escape="true"/></strong>
+                    </p>
+                </div>
+
+                <h:form id="paymentSummaryForm">
+                    <div class="summary-card order-details">
+                        <h3>Order Summary</h3>
+
+                        <div class="price-row">
+                            <span>Ticket Price (<h:outputText value="#{movieBookingController.bookedSeatCount}"/> Ticket(s))</span>
+                            <span>₹<h:outputText value="#{movieBookingController.subTotalAmountWithoutFees}"/></span>
+                        </div>
+
+                        <div class="price-row">
+                            <span>Convenience Fees</span>
+                            <span>₹<h:outputText value="#{movieBookingController.convenienceFees}"/></span>
+                        </div>
+                        <div class="convenience-fees-details">
+                            (Includes GST and Service Charge)
+                        </div>
+
+                        <div class="price-row" style="color: #f84464;">
+                            <span>
+                                ❤ Donate to BookChange (<h:outputText value="#{movieBookingController.selectedSeats.size()}"/> per ticket)
+                            </span>
+                            <span>+ ₹<h:outputText value="#{movieBookingController.donationAmount}"/></span>
+                        </div>
+
+                        <div class="total-row">
+                            <span>Total Amount</span>
+                            <span>₹<h:outputText value="#{movieBookingController.totalAmountWithFees}"/></span>
+                        </div>
+                    </div>
+
+                    <div class="summary-card user-details">
+                        <h3>Your Details (for sending booking details)</h3>
+                        <div class="user-row">
+                            <p>Email: <strong><h:outputText id="emailText" value="#{empty movieBookingController.currentUser ? '' : movieBookingController.currentUser.email}"/></strong></p>
+                            <span class="edit-btn" onclick="editField('email')">Edit</span>
+                        </div>
+                        <div class="user-row">
+                            <p>Phone: <strong><h:outputText id="phonenoText" value="#{movieBookingController.currentUser.phoneno}"/></strong></p>
+                            <span class="edit-btn" onclick="editField('phoneno')">Edit</span>
+                        </div>
+                    </div>
+
+                    <h:form id="updateUserForm">
+                        <h:commandButton id="updateBtn" action="#{movieBookingController.updateUser}" style="display:none">
+                            <f:param name="field" id="fieldParam" value="" />
+                            <f:param name="newValue" id="valueParam" value="" />
+                        </h:commandButton>
+                    </h:form>
+
+
+
+                    <div class="offers-section">
+                        <span>🎁 Apply Offers</span>
+                        <span>&gt;</span>
+                    </div>
+
+                    <div class="sticky-footer">
+                        <h:commandButton value="Proceed to Pay"
+                                         action="movie_paymentmethods.xhtml" styleClass="pay-btn"/>
+                    </div>
+                </h:form>
+
+            </div>
+        </h:form>
+
+        <!--        <script type="text/javascript">
+                    function editField(field) {
+                        let currentValue = document.getElementById(field + 'Text').innerText;
+                        let newValue = prompt("Enter new " + field + ":", currentValue);
+                        if (newValue !== null && newValue.trim() !== "") {
+                            // Set hidden form params
+                            document.getElementById('updateUserForm:fieldParam').value = field;
+                            document.getElementById('updateUserForm:valueParam').value = newValue;
+                            // Submit the form
+                            document.getElementById('updateUserForm:updateBtn').click();
+                        }
+                    }
+                </script>-->
+
+    </h:body>
+</html>

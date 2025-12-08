@@ -4,7 +4,6 @@
  */
 package entity;
 
-import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,6 +18,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -30,7 +31,7 @@ import java.util.Date;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "booking")
@@ -75,6 +76,8 @@ public class Booking implements Serializable {
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
+    @Basic(optional = false)
+    @NotNull
     @Size(max = 7)
     @Column(name = "status")
     private String status;
@@ -90,8 +93,18 @@ public class Booking implements Serializable {
     @ManyToOne(optional = false)
     private User userId;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "bookingId")
-    @JsonbTransient 
     private Collection<Payment> paymentCollection;
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+    private Collection<BookedSeat> bookedSeatCollection;
+
+    public Collection<BookedSeat> getBookedSeatCollection() {
+        return bookedSeatCollection;
+    }
+
+    public void setBookedSeatCollection(Collection<BookedSeat> bookedSeatCollection) {
+        this.bookedSeatCollection = bookedSeatCollection;
+    }
 
     public Booking() {
     }
@@ -221,5 +234,28 @@ public class Booking implements Serializable {
     public String toString() {
         return "entity.Booking[ bookingId=" + bookingId + " ]";
     }
+
+    @PrePersist
+    public void prePersist() {
+        Date now = new Date();
+        this.createdAt = now;
+        this.updatedAt = now;
+
+        if (this.bookingStatus == null || this.bookingStatus.isEmpty()) {
+            this.bookingStatus = "Confirmed"; // default when booking is created
+        }
+        if (this.status == null || this.status.isEmpty()) {
+            this.status = "active"; // default status
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = new Date();
+    }
+
     
+    public enum Status{
+        active, pending, blocked;
+    }
 }
