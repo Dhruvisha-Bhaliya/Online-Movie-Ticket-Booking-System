@@ -4,7 +4,6 @@
  */
 package entity;
 
-import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -23,20 +22,18 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Date;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "showmovie")
 @NamedQueries({
     @NamedQuery(name = "Showmovie.findAll", query = "SELECT s FROM Showmovie s"),
     @NamedQuery(name = "Showmovie.findByShowId", query = "SELECT s FROM Showmovie s WHERE s.showId = :showId"),
-    @NamedQuery(name = "Showmovie.findByBasePrice", query = "SELECT s FROM Showmovie s WHERE s.basePrice = :basePrice"),
     @NamedQuery(name = "Showmovie.findByShowTime", query = "SELECT s FROM Showmovie s WHERE s.showTime = :showTime"),
     @NamedQuery(name = "Showmovie.findByCreatedAt", query = "SELECT s FROM Showmovie s WHERE s.createdAt = :createdAt"),
     @NamedQuery(name = "Showmovie.findByUpdatedAt", query = "SELECT s FROM Showmovie s WHERE s.updatedAt = :updatedAt"),
@@ -49,8 +46,6 @@ public class Showmovie implements Serializable {
     @Basic(optional = false)
     @Column(name = "show_id")
     private Long showId;
-    @Column(name = "base_price")
-    private BigInteger basePrice;
     @Column(name = "show_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date showTime;
@@ -68,10 +63,8 @@ public class Showmovie implements Serializable {
     @Column(name = "status")
     private String status;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "showId")
-    @JsonbTransient 
     private Collection<Booking> bookingCollection;
     @JoinColumn(name = "movie_id", referencedColumnName = "movie_id")
-    @JsonbTransient 
     @ManyToOne
     private Movie movieId;
     @JoinColumn(name = "screen_id", referencedColumnName = "screen_id")
@@ -97,14 +90,6 @@ public class Showmovie implements Serializable {
 
     public void setShowId(Long showId) {
         this.showId = showId;
-    }
-
-    public BigInteger getBasePrice() {
-        return basePrice;
-    }
-
-    public void setBasePrice(BigInteger basePrice) {
-        this.basePrice = basePrice;
     }
 
     public Date getShowTime() {

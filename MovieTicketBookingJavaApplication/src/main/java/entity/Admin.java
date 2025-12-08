@@ -20,11 +20,12 @@ import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "admin")
@@ -36,7 +37,8 @@ import java.util.Date;
     @NamedQuery(name = "Admin.findByEmail", query = "SELECT a FROM Admin a WHERE a.email = :email"),
     @NamedQuery(name = "Admin.findByCreatedAt", query = "SELECT a FROM Admin a WHERE a.createdAt = :createdAt"),
     @NamedQuery(name = "Admin.findByUpdatedAt", query = "SELECT a FROM Admin a WHERE a.updatedAt = :updatedAt"),
-    @NamedQuery(name = "Admin.findByStatus", query = "SELECT a FROM Admin a WHERE a.status = :status")})
+    @NamedQuery(name = "Admin.findByStatus", query = "SELECT a FROM Admin a WHERE a.status = :status"),
+    @NamedQuery(name = "Admin.findByPhoneno", query = "SELECT a FROM Admin a WHERE a.phoneno = :phoneno")})
 public class Admin implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -67,11 +69,11 @@ public class Admin implements Serializable {
     @Size(max = 7)
     @Column(name = "status")
     private String status;
+    @Column(name = "phoneno")
+    private BigInteger phoneno;
     @JoinColumn(name = "role", referencedColumnName = "role_id")
     @ManyToOne
     private RoleMaster role;
-    @Column(name = "phoneno")
-    private Long phoneno;
 
     public Admin() {
     }
@@ -142,20 +144,20 @@ public class Admin implements Serializable {
         this.status = status;
     }
 
+    public BigInteger getPhoneno() {
+        return phoneno;
+    }
+
+    public void setPhoneno(BigInteger phoneno) {
+        this.phoneno = phoneno;
+    }
+
     public RoleMaster getRole() {
         return role;
     }
 
     public void setRole(RoleMaster role) {
         this.role = role;
-    }
-
-    public Long getPhoneno() {
-        return phoneno;
-    }
-
-    public void setPhoneno(Long phoneno) {
-        this.phoneno = phoneno;
     }
 
     @Override
@@ -182,5 +184,5 @@ public class Admin implements Serializable {
     public String toString() {
         return "entity.Admin[ adminId=" + adminId + " ]";
     }
-
+    
 }

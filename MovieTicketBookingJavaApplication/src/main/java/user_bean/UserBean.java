@@ -23,5 +23,10 @@ public class UserBean implements UserBeanLocal {
         return em.find(User.class, userId);
     }
 
+    @Override
+    public void updateUser(User userId) {
+        em.merge(userId);
+    }
+
     
 }

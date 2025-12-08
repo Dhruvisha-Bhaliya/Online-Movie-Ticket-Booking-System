@@ -1,173 +1,443 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
-      xmlns:c="jakarta.tags.core"
+      xmlns:ui="jakarta.faces.facelets"
       xmlns:f="jakarta.faces.core">
+
     <h:head>
-       <title>Seat Selection - #{movieBookingController.selectedMovie.movieTitle}</title>
-        <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&amp;display=swap" rel="stylesheet" />
+        <title>Select Seats</title>
+
         <style>
-            /* --- Seat Selection Styling --- */
-            body { 
-                font-family: 'Roboto', sans-serif; 
-                margin: 0; 
-                background-color: #f5f5f5; 
+            body {
+                font-family: "Roboto", Arial, sans-serif;
+                background-color: #ffffff;
+                margin: 0;
+                padding: 0;
             }
-            .container {
-                width: 70%;
-                max-width: 900px;
-                margin: 30px auto;
-                background: #fff;
-                padding: 30px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+            .page-container {
+                width: 100%;
+                max-width: 1150px;
+                margin: auto;
             }
-            h2 { color: #f84464; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
-            .show-details { font-size: 16px; margin-bottom: 20px; }
-            .screen {
-                text-align: center;
-                border-bottom: 3px solid #ccc;
-                margin-bottom: 30px;
-                padding: 10px;
-                font-weight: bold;
-                background-color: #eee;
-                color: #555;
+            
+            .movie-header {
+                padding: 20px 0;
+                border-bottom: 1px solid #e6e6e6;
             }
-            .seat-map {
-                display: grid;
-                /* Adjust columns based on the max number of seats in a row */
-                grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)); 
-                gap: 8px;
-                margin-bottom: 30px;
+
+            .movie-header h2 {
+                font-size: 22px;
+                margin: 0;
+                color: #1f1f1f;
+                font-weight: 600;
             }
-            .seat-row {
-                display: contents; /* Allows seats to span columns directly under the map grid */
-            }
-            .seat {
-                width: 30px;
-                height: 30px;
-                background-color: #e0e0e0;
-                border-radius: 4px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 12px;
-                font-weight: 500;
-                color: #333;
-                cursor: pointer;
-                border: 1px solid #ccc;
-                transition: background-color 0.1s;
-            }
-            .seat.available:hover {
-                background-color: #c0f0c0;
-            }
-            .seat.booked {
-                background-color: #ffcccc; /* Red for booked */
-                cursor: not-allowed;
-                opacity: 0.7;
-            }
-            .seat.selected {
-                background-color: #4CAF50; /* Green for selected */
-                color: white;
-                border-color: #388e3c;
-            }
-            .seat-label {
-                grid-column: 1 / -1; /* Forces the label to span the entire row */
-                text-align: left;
-                font-weight: bold;
-                margin-top: 10px;
-                color: #777;
+
+            .movie-header p {
+                margin: 6px 0 0 0;
+                color: #666;
                 font-size: 14px;
             }
-            
-            /* --- Summary Footer --- */
-            .summary-footer {
-                border-top: 1px solid #e0e0e0;
-                padding-top: 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+
+            .screen-container {
+                margin-top: 40px;
+                text-align: center;
             }
-            .total-amount {
+
+            .screen-bar {
+                width: 70%;
+                margin: auto;
+                padding: 10px;
+                font-size: 14px;
+                color: #444;
+                border-radius: 40px 40px 5px 5px / 20px 20px 5px 5px;
+                background: linear-gradient(to top, #cccccc, #e6e6e6);
+            }
+
+            .category-strip {
+                background: #f1f1f1;
+                padding: 8px 5px;
+                margin: 40px auto 10px auto;
+                text-align: center;
+                width: 90%;
+                font-weight: 600;
+                font-size: 15px;
+                color: #454545;
+                border-radius: 4px;
+            }
+
+            .seat-row {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 6px;
+            }
+
+            .row-label {
+                width: 30px;
+                margin-right: 15px;
+                font-size: 14px;
+                color: #444;
+                font-weight: bold;
+            }
+
+            .seat {
+                width: 29px;
+                height: 29px;
+                font-size: 11px;
+                border-radius: 4px;
+                margin: 3px;
+                line-height: 29px;
+                text-align: center;
+                cursor: pointer;
+                border: 1px solid transparent;
+                font-weight: bold;
+                transition: .15s ease;
+            }
+
+            .type-recliner {
+                background: #6c5ce7;
+                color: #fff;
+                width: 48px;
+                height: 35px;
+                line-height: 35px;
+            }
+
+            .type-executive {
+                background: #55efc4;
+                color: #111;
+            }
+
+            .type-royal {
+                background: #f7cd6b;
+                color: #111;
+            }
+
+            .type-marvel {
+                background: #fb8c00;
+                color: #fff;
+            }
+
+            .seat.booked {
+                background: #b5b5b5 !important;
+                color: white !important;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .seat.selected {
+                background: #f84464 !important;
+                color: white;
+                box-shadow: 0 0 8px rgba(248, 68, 100, 0.6);
+            }
+
+            .seat:hover:not(.booked):not(.selected) {
+                box-shadow: 0 0 6px rgba(0,0,0,0.3);
+            }
+
+            .aisle-space {
+                width: 25px;
+            }
+
+            .legend {
+                margin-top: 40px;
+                text-align: center;
+                padding-bottom: 80px;
+            }
+
+            .legend-item {
+                display: inline-flex;
+                align-items: center;
+                margin: 0 18px;
+                font-size: 13px;
+            }
+
+            .legend-color {
+                width: 18px;
+                height: 18px;
+                margin-right: 5px;
+                border-radius: 3px;
+            }
+
+            .summary-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                background: white;
+                border-top: 1px solid #ddd;
+                padding: 15px 40px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 20;
+            }
+
+            .summary-footer p {
+                margin: 0 20px;
+                font-size: 14px;
+            }
+
+            .pay-btn {
+                background: #f84464;
+                color: white;
+                padding: 10px 22px;
+                font-size: 15px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .pay-btn:disabled {
+                background: #ccc;
+            }
+
+            .modal-overlay {
+                display: none; 
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0,0,0,0.6); 
+                justify-content: center;
+                align-items: center;
+
+            }
+
+            /* Modal Content Box */
+            .modal-content {
+                background-color: #fefefe;
+                margin: 15% auto;
+                padding: 20px;
+                border-radius: 8px;
+                width: 80%; 
+                max-width: 500px; 
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+
+            .modal-header h2 {
                 font-size: 20px;
                 font-weight: bold;
-                color: #333;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #eee;
             }
-            .book-btn {
-                background-color: #f84464;
-                color: white;
+
+            .modal-body {
+                padding: 15px 0;
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .modal-body ol {
+                list-style-type: decimal;
+                margin-left: 15px;
+                padding-left: 0;
+            }
+
+            .modal-body li {
+                font-size: 14px;
+                line-height: 1.4;
+                margin-bottom: 8px;
+            }
+
+            .modal-footer {
+                display: flex;
+                justify-content: flex-end;
+                padding-top: 15px;
+                border-top: 1px solid #eee;
+            }
+
+           
+            .btn {
+                padding: 10px 20px;
+                margin-left: 10px;
                 border: none;
-                padding: 12px 25px;
-                border-radius: 6px;
-                font-size: 16px;
+                border-radius: 4px;
                 cursor: pointer;
-                transition: background-color 0.2s;
+                text-align: center;
+                text-decoration: none; 
+                font-weight: bold;
+                font-size: 16px;
             }
-            .book-btn:hover {
-                background-color: #e6004c;
+
+            .btn-cancel {
+                background-color: #fff;
+                color: #f84464;
+                border: 1px solid #ccc;
             }
+
+            .btn-accept {
+                background-color: #f84464; 
+                color: white;
+            }
+
         </style>
     </h:head>
+
+
     <h:body>
-        <div class="container">
-            <h:messages showDetail="true" showSummary="false" style="color:red;"/>
-            
-            <h2>Seat Selection for: #{movieBookingController.selectedMovie.movieTitle}</h2>
-            
-            <div class="show-details">
-                **Theater:** #{movieBookingController.selectedShow.screenId.theaterId.theaterName} | 
-                **Time:** #{movieBookingController.formatTime(movieBookingController.selectedShow.showTime)} |
-                **Price per Seat:** ₹#{movieBookingController.selectedShow.basePrice}
+
+        <div class="page-container">
+
+            <div class="movie-header">
+                <h2>
+                    <h:outputText value="#{movieBookingController.selectedMovie.movieTitle} - #{movieBookingController.selectedShow.screenId.theaterId.theaterName}"/>
+                </h2>
+
+                <p>
+                    <h:outputText value="#{movieBookingController.selectedShow.showTime}">
+                        <f:convertDateTime pattern="EEE, dd MMM yyyy • h:mm a" timeZone="IST"/>
+                    </h:outputText>
+                    | Seats Requested:
+                    <strong><h:outputText value="#{movieBookingController.numberOfSeats}"/></strong>
+                </p>
             </div>
 
-            <div class="screen">SCREEN THIS WAY</div>
+            <div class="screen-container">
+                <div class="screen-bar">SCREEN THIS SIDE</div>
+            </div>
 
             <h:form id="seatForm">
-                <div class="seat-map">
-                    <c:set var="lastRow" value="" />
-                    <c:forEach items="#{movieBookingController.allSeats}" var="seat">
-                        
-                        <c:if test="#{seat.seatRow != lastRow}">
-                            <div class="seat-label">Row #{seat.seatRow}</div>
-                            <c:set var="lastRow" value="#{seat.seatRow}" />
-                        </c:if>
-                        
-                        <c:set var="isBooked" value="#{movieBookingController.isSeatBooked(seat.seatId)}" />
-                        <c:set var="isSelected" value="#{movieBookingController.isSeatSelected(seat)}" />
-                        
-                        <h:commandLink action="#{movieBookingController.toggleSeat(seat)}" 
-                                       rendered="#{!isBooked}" 
-                                       styleClass="seat available #{isSelected ? 'selected' : ''}">
-                            #{seat.seatNumber}
-                            <f:ajax render="@form:summary" />
-                        </h:commandLink>
 
-                        <h:outputText value="#{seat.seatNumber}" 
-                                      rendered="#{isBooked}" 
-                                      styleClass="seat booked" />
-                                      
-                    </c:forEach>
-                </div>
-                
-                <h:panelGroup id="summary">
-                    <div class="summary-footer">
-                        <h:panelGroup layout="block">
-                            <p>Seats Selected: 
-                                <strong>#{movieBookingController.selectedSeats.size()}</strong>
-                            </p>
-                            <div class="total-amount">
-                                Total Amount: ₹<h:outputText value="#{movieBookingController.totalAmount}" />
-                            </div>
-                        </h:panelGroup>
+                #{movieBookingController.setLastRenderedCategory(null)}
 
-                        <h:commandButton value="Pay &amp; Book Now" 
-                                         action="#{movieBookingController.completeBooking()}" 
-                                         styleClass="book-btn" 
-                                         disabled="#{movieBookingController.totalAmount == 0}" />
+                <ui:repeat value="#{movieBookingController.sortedSeatsGroupedByRowEntries}" var="rowEntry">
+
+                    <!-- CATEGORY STRIP -->
+                    <h:panelGroup
+                        rendered="#{movieBookingController.isFirstRowForCategory(rowEntry.key)}"
+                        layout="block">
+                        <div class="category-strip">
+                            ₹#{movieBookingController.getPriceForCategoryRow(rowEntry.value)}
+                            —
+                            #{movieBookingController.categoryNameForRow(rowEntry.value).categoryName}
+                        </div>
+                    </h:panelGroup>
+
+                    <!-- ROW -->
+                    <div class="seat-row">
+                        <div class="row-label">#{rowEntry.key}</div>
+
+                        <ui:repeat value="#{rowEntry.value}" var="seat">
+
+                            <h:commandLink action="#{movieBookingController.toggleSeat(seat)}"
+                                           styleClass="seat type-#{movieBookingController.formatCategoryForCSS(seat.categoryId.categoryName)}
+                                           #{movieBookingController.isSeatBooked(seat.seatId) ? 'booked' : ''}
+                                           #{movieBookingController.isSeatSelected(seat) ? 'selected' : ''}"
+                                           disabled="#{movieBookingController.isSeatBooked(seat.seatId)}">
+
+                                <h:outputText value="#{seat.seatNumber}"/>
+                                <f:ajax render=":seatForm :summaryPanel"/>
+                            </h:commandLink>
+
+
+                        </ui:repeat>
                     </div>
-                </h:panelGroup>
+
+                </ui:repeat>
+
             </h:form>
+
+            <div class="legend">
+
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#ccc;"></div> Booked
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background:#f84464;"></div> Selected
+                </div>
+            </div>
+
+
+
         </div>
+
+        <div class="summary-footer">
+            <h:panelGroup id="summaryPanel">
+                <p>
+                    Selected:
+                    <strong>#{movieBookingController.selectedSeats.size()}</strong>
+                    /
+                    <strong>#{movieBookingController.numberOfSeats}</strong>
+                </p>
+
+                <p>
+                    Total:
+                    <strong>₹#{movieBookingController.totalAmount}</strong>
+                </p>
+
+                <h:form>
+                    <h:commandButton value="Proceed to Pay"
+                                     onclick="showTermsModal(); return false;"
+                                     action="#{movieBookingController.completeBooking()}"
+                                     styleClass="pay-btn"
+                                     disabled="#{movieBookingController.selectedSeats.size() 
+                                                 != movieBookingController.numberOfSeats}"/>
+                </h:form>
+            </h:panelGroup>
+        </div>
+
+        <div id="terms-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Terms - Conditions</h2>
+                </div>
+                <div class="modal-body">
+                    <ol>
+                        <li>Cinema reserves the right to cancel or modify showtimes without prior notice due to low occupancy, technical issues, or other operational reasons.</li>
+                        <li>Cinema reserves the Right of Admission.</li>
+                        <li>Ticket is compulsory for children of 3 years above.</li>
+                        <li>Tickets once purchased cannot be cancelled, exchanged or refunded.</li>
+                        <li>Outside food and beverages are not allowed in the cinema.</li>
+                        <li>Patrons below the age of 18 years cannot be admitted for movies certified `A`.</li>
+                        <li>For 3D movies, ticket price includes charges towards usage of 3D glasses.</li>
+                        <li>Ticket prices and movie schedules are subject to change without any prior notification.</li>
+                        <li>Items like carry-bags, eatables, helmets, handbags are not allowed inside the theatres and are strictly prohibited.</li>
+                        <li>Items like laptops, camera, knives, lighter, match box, cigarettes, tobacco, firearms, arms and ammunition, and all types of inflammable objects are strictly prohibited.</li>
+                    </ol>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancel-terms-btn" type="button" class="btn btn-cancel">Cancel</button>
+
+                    <h:form id="acceptForm">
+                        <h:commandButton value="Accept"
+                                         styleClass="btn btn-accept"
+                                         action="#{movieBookingController.completeBooking()}"
+                                         onclick="hideTermsModal();"/>
+                    </h:form>
+
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function showTermsModal() {
+                document.getElementById('terms-modal').style.display = 'block';
+            }
+
+            // Hide the modal when the cancel button is clicked
+            document.getElementById('cancel-terms-btn').onclick = function () {
+                document.getElementById('terms-modal').style.display = 'none';
+            };
+
+            // Optional: Hide the modal if the user clicks anywhere outside of it
+            window.onclick = function (event) {
+                var modal = document.getElementById('terms-modal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            function hideTermsModal() {
+                document.getElementById('terms-modal').style.display = 'none';
+            }
+        </script>
+
     </h:body>
 </html>

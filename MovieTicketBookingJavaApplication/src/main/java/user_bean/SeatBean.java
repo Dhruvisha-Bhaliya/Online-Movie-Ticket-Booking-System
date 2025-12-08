@@ -68,6 +68,14 @@ public class SeatBean implements SeatBeanLocal {
         }
     }
 
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
+
+    @Override
+    public List<Seat> findSeatsByScreen(Long screenId) {
+        return em.createQuery(
+            "SELECT s FROM Seat s WHERE s.screenId.screenId = :screenId ORDER BY s.seatRow, s.seatNumber", 
+            Seat.class
+        )
+        .setParameter("screenId", screenId)
+        .getResultList();
+    }
 }

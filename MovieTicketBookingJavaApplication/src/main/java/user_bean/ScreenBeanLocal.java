@@ -5,6 +5,7 @@
 package user_bean;
 
 import entity.Screen;
+import entity.Seat;
 import jakarta.ejb.Local;
 import java.util.List;
 
@@ -19,4 +20,5 @@ public interface ScreenBeanLocal {
     void removeScreen(Screen screen);
     Screen findScreen(Object ScreenId);
     List<Screen> findAllScreen();
+    List<Screen> findAll();
 }

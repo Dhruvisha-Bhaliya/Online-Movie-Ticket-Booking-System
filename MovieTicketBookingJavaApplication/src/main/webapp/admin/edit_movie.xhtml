@@ -44,11 +44,10 @@
 
                 <h:outputLabel value="Poster Image:" />
                 <h:panelGroup>
-                    <!-- Show existing image -->
                     <h:graphicImage library="images" name="#{adminMovieController.movie.posterImagePath}" 
                                     width="100" height="130" rendered="#{not empty adminMovieController.movie.posterImagePath}" />
                     <br/>
-                    <!-- File upload to replace image -->
+                
                     <h:inputFile value="#{adminMovieController.uploadedFile}" />
                 </h:panelGroup>
             </h:panelGrid>

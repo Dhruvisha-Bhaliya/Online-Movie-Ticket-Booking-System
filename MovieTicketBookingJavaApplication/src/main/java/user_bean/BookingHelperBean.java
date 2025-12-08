@@ -20,8 +20,6 @@ public class BookingHelperBean implements BookingHelperBeanLocal {
     @PersistenceContext(unitName = "myMovie")
     private EntityManager em;
 
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
     @Override
     public List<Long> findBookedSeatIdsByShow(Long showId) {
         return em.createQuery(

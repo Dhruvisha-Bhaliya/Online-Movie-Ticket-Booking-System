@@ -23,4 +23,5 @@ public interface SeatBeanLocal {
     List<Seat> findAllSeats();
     List<Seat> findSeatsByScreen(Screen screen);
     List<Seat> findSeatsByScreenAndStatus(Long screenId, String status);    
+    List<Seat> findSeatsByScreen(Long screenId);
 }

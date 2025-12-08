@@ -4,7 +4,6 @@
  */
 package entity;
 
-import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -28,7 +27,7 @@ import java.util.Date;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "screen")
@@ -74,15 +73,15 @@ public class Screen implements Serializable {
     @Size(max = 7)
     @Column(name = "status")
     private String status;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "screenId")
-    @JsonbTransient
-    private Collection<Seat> seatCollection;
     @OneToMany(mappedBy = "screenId")
-    @JsonbTransient
     private Collection<Showmovie> showmovieCollection;
     @JoinColumn(name = "theater_id", referencedColumnName = "theater_id")
     @ManyToOne(optional = false)
     private Theater theaterId;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "screenId")
+    private Collection<Seat> seatCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "screenId")
+    private Collection<SeatCategory> seatCategoryCollection;
 
     public Screen() {
     }
@@ -155,14 +154,6 @@ public class Screen implements Serializable {
         this.status = status;
     }
 
-    public Collection<Seat> getSeatCollection() {
-        return seatCollection;
-    }
-
-    public void setSeatCollection(Collection<Seat> seatCollection) {
-        this.seatCollection = seatCollection;
-    }
-
     public Collection<Showmovie> getShowmovieCollection() {
         return showmovieCollection;
     }
@@ -177,6 +168,22 @@ public class Screen implements Serializable {
 
     public void setTheaterId(Theater theaterId) {
         this.theaterId = theaterId;
+    }
+
+    public Collection<Seat> getSeatCollection() {
+        return seatCollection;
+    }
+
+    public void setSeatCollection(Collection<Seat> seatCollection) {
+        this.seatCollection = seatCollection;
+    }
+
+    public Collection<SeatCategory> getSeatCategoryCollection() {
+        return seatCategoryCollection;
+    }
+
+    public void setSeatCategoryCollection(Collection<SeatCategory> seatCategoryCollection) {
+        this.seatCategoryCollection = seatCategoryCollection;
     }
 
     @Override
@@ -203,5 +210,5 @@ public class Screen implements Serializable {
     public String toString() {
         return "entity.Screen[ screenId=" + screenId + " ]";
     }
-
+    
 }

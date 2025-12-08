@@ -52,12 +52,7 @@
                         <h:message for="time" style="color: red"/>
 
                         <h:outputLabel for="price" value="Base Price (₹):" />
-                        <h:inputText id="price" 
-                                     value="#{adminShowController.currentShow.basePrice}" 
-                                     required="true" requiredMessage="Base Price is required.">
-                             <f:convertNumber type="number" integerOnly="true"/>
-                        </h:inputText>
-                        <h:message for="price" style="color: red"/>
+
                         
                         <h:inputHidden value="#{adminShowController.currentShow.showId}" />
                         
@@ -80,7 +75,7 @@
                             <f:convertDateTime pattern="MMM dd, yyyy HH:mm"/>
                         </h:outputText>
                     </h:column>
-                    <h:column><f:facet name="header">Price</f:facet>₹#{show.basePrice}</h:column>
+
                     
                     <h:column>
                         <f:facet name="header">Action</f:facet>

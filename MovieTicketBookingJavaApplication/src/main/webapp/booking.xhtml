@@ -4,12 +4,12 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets"
-      xmlns:c="jakarta.tags.core">
+      >
+
     <h:head>
         <title>#{movieBookingController.selectedMovie.movieTitle} - Select Show</title>
         <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&amp;display=swap" rel="stylesheet" />
         <style>
-            /* --- Base Styling (Based on BookMyShow Screenshot) --- */
             body {
                 font-family: 'Roboto', sans-serif;
                 margin: 0;
@@ -42,7 +42,6 @@
                 color: #666;
             }
 
-            /* --- Filters/Day Selector --- */
             .filters-bar {
                 width: 90%;
                 margin: 0 auto;
@@ -81,7 +80,6 @@
                 color: #f84464;
             }
 
-            /* --- Theater List and Showtimes --- */
             .theater-list {
                 width: 90%;
                 margin: 0 auto;
@@ -108,11 +106,11 @@
                 flex-wrap: wrap;
                 gap: 15px;
             }
-            /* Showtime Button Styles */
+
             .showtime-btn {
                 text-decoration: none;
                 padding: 8px 12px;
-                border: 1px solid #4CAF50; /* Green border for available */
+                border: 1px solid #4CAF50; 
                 color: #4CAF50;
                 border-radius: 4px;
                 font-size: 14px;
@@ -120,7 +118,7 @@
                 line-height: 1.2;
                 transition: background-color 0.2s;
                 position: relative;
-                display: inline-block; /* Essential for commandLink sizing */
+                display: inline-block; 
             }
             .showtime-btn:hover {
                 background-color: #e8f5e9;
@@ -138,9 +136,128 @@
                 margin-top: 5px;
                 display: block;
             }
+
+          
+            .modal {
+                display: none; 
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0,0,0,0.7);
+            }
+            .modal-content {
+                background-color: #fefefe;
+                margin: 10vh auto; 
+                padding: 30px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 450px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            }
+            .modal-content h2 {
+                color: #333;
+                font-size: 1.6em;
+                font-weight: 700;
+                margin-bottom: 20px;
+            }
+
+            .dynamic-image-container {
+                height: 80px;
+                margin: 15px 0;
+            }
+            .dynamic-image-container img {
+                max-height: 100%;
+                width: auto;
+            }
+
+            .seat-selector-radio {
+                margin: 20px auto;
+                display: inline-flex;
+                flex-wrap: wrap; 
+                justify-content: center;
+                gap: 10px;
+            }
+            .seat-selector-radio div {
+                display: inline-block;
+            }
+            .seat-selector-radio label {
+                display: block;
+                width: 25px; 
+                height: 25px; 
+                padding: 5px;
+                border: 1px solid #ddd;
+                border-radius: 50%;
+                line-height: 25px; 
+                text-align: center;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+            }
+            .seat-selector-radio input[type="radio"] {
+                display: none;
+            }
+            .seat-selector-radio input[type="radio"]:checked + label {
+                background-color: #f84464;
+                color: white;
+                border-color: #f84464;
+            }
+
+            .price-categories-info {
+                font-size: 0.9em;
+                color: #666;
+                margin: 25px 0 10px 0;
+                padding-top: 15px;
+                border-top: 1px solid #eee;
+                display: flex; 
+                justify-content: space-around;
+            }
+            .price-category {
+                text-align: center;
+                line-height: 1.4;
+            }
+            .price-category .rate {
+                font-weight: 700;
+                color: #333;
+            }
+            .price-category .status {
+                font-size: 0.8em;
+                color: #4CAF50; 
+            }
+            .price-category .status.low {
+                color: #FF9800;
+            }
+
+            .bottom-message {
+                font-size: 0.85em;
+                color: #f84464;
+                margin-bottom: 20px;
+            }
+
+            .btn-select-seats {
+                background-color: #f84464;
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 1.1em;
+                font-weight: 500;
+                width: 100%;
+                margin-top: 15px;
+                transition: opacity 0.2s;
+            }
+            .btn-select-seats:hover {
+                opacity: 0.9;
+            }
         </style>
     </h:head>
     <h:body>
+
         <div class="main-content">
             <h:messages globalOnly="true" style="color:red;"/>
 
@@ -160,8 +277,9 @@
 
                 <div class="filters-bar">
                     <h:form id="dateForm">
+
                         <div class="day-selector">
-                            <ui:repeat value="#{movieBookingController.availableDates}" var="date">
+                            <ui:repeat value="#{movieBookingController.availableDates}" var="date" >
                                 <h:commandLink action="#{movieBookingController.filterByDate(date)}" styleClass="day-pill #{movieBookingController.selectedDate.time == date.time ? 'active' : ''}">
                                     <f:ajax render=":dateForm :showtimeListForm" />
                                     <div class="day-pill-day">
@@ -206,13 +324,11 @@
                                         <h:panelGroup rendered="#{not empty entry.value}">
                                             <ui:repeat value="#{entry.value}" var="show">
                                                 <div style="text-align: center;">
-                                                    <h:commandLink action="#{movieBookingController.selectShowtime(show.showId)}" styleClass="showtime-btn">
+                                                    <h:commandLink styleClass="showtime-btn" 
+                                                                   onclick="openSeatsModal(#{show.showId}, 0); return false;">
                                                         <h:outputText value="#{show.showTime}">
-                                                            <f:convertDateTime pattern="EEE, dd MMM yyyy • h:mm a" timeZone="IST" />
+                                                            <f:convertDateTime pattern="h:mm a" timeZone="IST" />
                                                         </h:outputText>
-                                                        <span class="showtime-format">
-                                                            ₹<h:outputText value="#{show.basePrice}" />
-                                                        </span>
                                                     </h:commandLink>
                                                 </div>
                                             </ui:repeat>
@@ -222,8 +338,120 @@
                             </ui:repeat>
                         </ui:fragment>
                     </h:form>
+
+                    <div id="seatsModal" class="modal">
+                        <div class="modal-content">
+                            <h2>How many seats?</h2>
+                            <div class="dynamic-image-container">
+
+                                <h:graphicImage id="dynamic-seat-image" library="images" name="Cycle.png" alt="Seats Icon"/>
+                            </div>
+
+                            <h:form id="seatsForm">
+
+                                <h:inputHidden id="selectedShowIdInput" value="#{movieBookingController.selectedShowIdForBooking}"/>
+
+
+                                <!-- Corrected Hidden JSF URLs -->
+                                <input type="hidden" id="seatsForm:img1" value="#{resource['images:Cycle.png']}" />
+                                <input type="hidden" id="seatsForm:img2" value="#{resource['images:Scooter.png']}" />
+                                <input type="hidden" id="seatsForm:img3" value="#{resource['images:car.png']}" />
+                                <input type="hidden" id="seatsForm:img4" value="#{resource['images:travel.png']}" />
+                                <input type="hidden" id="seatsForm:img5" value="#{resource['images:car(2).png']}" />
+                                <input type="hidden" id="seatsForm:img6" value="#{resource['images:vehicle.png']}" />
+                                <input type="hidden" id="seatsForm:img7" value="#{resource['images:van.png']}" />
+                                <input type="hidden" id="seatsForm:img8" value="#{resource['images:school-bus.png']}" />
+                                <input type="hidden" id="seatsForm:img9" value="#{resource['images:double-decker.png']}" />
+                                <input type="hidden" id="seatsForm:img10" value="#{resource['images:bus.png']}" />
+
+                                <div class="seat-selector-radio">
+                                    <h:selectOneRadio value="#{movieBookingController.numberOfSeats}" layout="lineDirection" onchange="updateSeatImage(this.value);" 
+                                                      required="true">
+                                        <f:selectItem itemValue="1" itemLabel="1"/>
+                                        <f:selectItem itemValue="2" itemLabel="2"/>
+                                        <f:selectItem itemValue="3" itemLabel="3"/>
+                                        <f:selectItem itemValue="4" itemLabel="4"/>
+                                        <f:selectItem itemValue="5" itemLabel="5"/>
+                                        <f:selectItem itemValue="6" itemLabel="6"/>
+                                        <f:selectItem itemValue="7" itemLabel="7"/>
+                                        <f:selectItem itemValue="8" itemLabel="8"/>
+                                        <f:selectItem itemValue="9" itemLabel="9"/>
+                                        <f:selectItem itemValue="10" itemLabel="10"/>
+                                    </h:selectOneRadio>
+                                </div>
+
+
+
+                                <h:commandButton value="Select Seats" 
+                                                 action="#{movieBookingController.proceedToSeatLayout()}"
+                                                 onclick="document.getElementById('seatsModal').style.display = 'none';" 
+                                                 styleClass="btn-select-seats"/>
+                            </h:form>
+                        </div>
+                    </div>
                 </div>
             </ui:fragment>
         </div>
+
+        <div id="seatCountModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100;">
+            <div class="modal-content" style="background:white; margin:15% auto; padding:20px; border-radius:8px; width:300px; text-align:center;">
+                <h2>How many seats?</h2>
+                <h:form id="seatCountForm">
+                    <h:inputHidden id="selectedShowId" value="#{movieBookingController.selectedShowIdForBooking}" />
+
+                    <div class="seat-picker">
+                        <ui:repeat value="#{movieBookingController.numberOfSeatsOptions}" var="count">
+                            <h:commandLink action="#{movieBookingController.setNumberOfSeats(count)}"
+                                           onclick="document.getElementById('seatCountForm:numSeatsValue').value = #{count};" 
+                                           styleClass="seat-count-pill #{movieBookingController.numberOfSeats == count ? 'active' : ''}">
+                                <h:outputText value="#{count}" />
+                                <f:ajax render="@this" />
+                            </h:commandLink>
+                        </ui:repeat>
+                    </div>
+
+                    <h:inputHidden id="numSeatsValue" value="#{movieBookingController.numberOfSeats}" />
+
+                    <div class="base-price-display">
+                        Base Price: ₹<h:outputText value="#{movieBookingController.selectedShow.basePrice}" />
+                    </div>
+
+                    <h:commandButton action="#{movieBookingController.proceedToSeatLayout()}" 
+                                     value="Select Seats" 
+                                     styleClass="select-seats-button" />
+
+                </h:form>
+                <button onclick="document.getElementById('seatCountModal').style.display = 'none';" style="margin-top: 10px;">Cancel</button>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+
+            function updateSeatImage(seatCount) {
+                var imgElement = document.getElementById('dynamic-seat-image');
+
+                var index = seatCount > 10 ? 10 : seatCount;
+                var hiddenId = 'seatsForm:img' + index;
+
+                var urlElement = document.getElementById(hiddenId);
+
+                if (urlElement) {
+                    imgElement.src = urlElement.value;
+                }
+            }
+
+
+            function openSeatsModal(showId, basePrice) {
+                document.getElementById('seatsModal').style.display = 'block';
+
+                document.getElementById('seatsForm:selectedShowIdInput').value = showId;
+
+                document.getElementById('basePriceDisplay').innerText = basePrice;
+                return false;
+
+            }
+        </script>
     </h:body>
+
+
 </html>

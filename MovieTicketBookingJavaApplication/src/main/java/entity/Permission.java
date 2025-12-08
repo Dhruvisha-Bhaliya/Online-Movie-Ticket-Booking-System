@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author DELL
+ * @author HP
  */
 @Entity
 @Table(name = "permission")

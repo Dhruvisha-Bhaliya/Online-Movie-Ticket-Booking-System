@@ -61,7 +61,7 @@ public class ShowBean implements ShowBeanLocal {
                
             /*"SELECT s FROM Showmovie s WHERE s.movieId.movieId = :movieId AND s.showTime >= :now ORDER BY s.showTime", Showmovie.class)
             .setParameter("movieId", movieId)
-            .setParameter("now", new Date()) // <-- This is the filter
+            .setParameter("now", new Date()) 
             .getResultList();*/
                
             /*"SELECT s FROM Showmovie s WHERE s.movieId.movieId = :movieId ORDER BY s.showTime", Showmovie.class)

@@ -10,22 +10,28 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
+import jakarta.faces.convert.FacesConverter;
+import jakarta.inject.Named;
 import user_bean.ScreenBeanLocal;
 
 /**
  *
  * @author DELL
  */
-@jakarta.inject.Named("screenConverter")
+@FacesConverter(value = "screenConverter", managed = true)
+@Named("screenConverter")
 @RequestScoped
-public class ScreenConverter implements Converter<Screen>{
-	@EJB
+public class ScreenConverter implements Converter<Screen> {
+
+    @EJB
     // Ensure you have this ScreenBeanLocal interface and implementation
-    private ScreenBeanLocal screenBean; 
+    private ScreenBeanLocal screenBean;
 
     @Override
     public Screen getAsObject(FacesContext context, UIComponent component, String value) {
-        if (value == null || value.isEmpty()) return null;
+        if (value == null || value.isEmpty()) {
+            return null;
+        }
         try {
             Long id = Long.parseLong(value);
             return screenBean.findScreen(id);
@@ -36,8 +42,10 @@ public class ScreenConverter implements Converter<Screen>{
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Screen screen) {
-        if (screen == null || screen.getScreenId() == null) return "";
-        return screen.getScreenId().toString(); 
+        if (screen == null || screen.getScreenId() == null) {
+            return "";
+        }
+        return screen.getScreenId().toString();
     }
-    
+
 }
