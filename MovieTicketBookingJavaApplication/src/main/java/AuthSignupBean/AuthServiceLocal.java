@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Local
 public interface AuthServiceLocal {
-    
+
     List<RoleMaster> getAllRoles();
 
     void signUp(String username, String email, String password, Long roleId);

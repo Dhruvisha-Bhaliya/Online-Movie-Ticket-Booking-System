@@ -25,10 +25,9 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserAuthResource {
 
-  @EJB
+    @EJB
     private AuthServiceAPI authService;
 
-    // Helper method to consolidate success/error response formatting
     private Response respond(RestAPIStructure.ApiResponse<?> apiResponse) {
         if (apiResponse.isStatus()) {
             return ResponseFormatter.success(apiResponse.getStatus_code(), apiResponse.getMessage(), apiResponse.getData());
@@ -37,7 +36,6 @@ public class UserAuthResource {
         }
     }
 
-    // C - Register New Customer
     @POST
     @Path("/register")
     public Response register(User user) {
@@ -45,15 +43,13 @@ public class UserAuthResource {
         return respond(apiResponse);
     }
 
-    // R - Login Customer
     @POST
     @Path("/login")
     public Response login(Map<String, String> loginData) {
         var apiResponse = authService.loginUser(loginData.get("email"), loginData.get("password"));
         return respond(apiResponse);
     }
-    
-    // U - Update Customer Profile (Requires Authentication)
+
     @PUT
     @Path("/profile")
     public Response updateProfile(User updatedUser, @Context HttpHeaders headers) {
@@ -62,7 +58,6 @@ public class UserAuthResource {
         return respond(apiResponse);
     }
 
-    // U - Update Customer Password (Requires Authentication)
     @PUT
     @Path("/updatePassword")
     public Response updatePassword(Map<String, String> requestBody, @Context HttpHeaders headers) {
@@ -73,7 +68,6 @@ public class UserAuthResource {
         return respond(apiResponse);
     }
 
-    // D - Deactivate/Delete Customer Account (Requires Authentication)
     @DELETE
     @Path("/delete")
     public Response deleteAccount(@Context HttpHeaders headers) {

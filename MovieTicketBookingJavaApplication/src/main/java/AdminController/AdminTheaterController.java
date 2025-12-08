@@ -18,7 +18,7 @@ import user_bean.TheaterBeanLocal;
  *
  * @author DELL
  */
-@Named("adminTheaterController") // <--- This name MUST EXACTLY MATCH the name in the XHTML
+@Named("adminTheaterController")
 @SessionScoped
 public class AdminTheaterController implements Serializable {
 
@@ -39,7 +39,6 @@ public class AdminTheaterController implements Serializable {
         theaterList = theaterBean.findallTheater();
     }
 
-    // --- Getters and Setters ---
     public Theater getCurrentTheater() {
         return currentTheater;
     }
@@ -49,7 +48,6 @@ public class AdminTheaterController implements Serializable {
     }
 
     public List<Theater> getTheaterList() {
-        // Reload list only if null or forced (for simplicity, we reload on every call)
         loadTheaters();
         return theaterList;
     }
@@ -57,9 +55,7 @@ public class AdminTheaterController implements Serializable {
     public boolean isEditMode() {
         return editMode;
     }
-    // ---------------------------
 
-    // --- Action Methods ---
     public String saveTheater() {
 
         Date now = new Date();
@@ -85,7 +81,6 @@ public class AdminTheaterController implements Serializable {
     }
 
     public void editTheater(Theater theater) {
-        // Set the current theater to the one being edited and enter edit mode
         this.currentTheater = theater;
         this.editMode = true;
     }

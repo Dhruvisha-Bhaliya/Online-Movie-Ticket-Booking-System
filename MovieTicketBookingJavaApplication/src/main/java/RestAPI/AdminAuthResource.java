@@ -28,7 +28,6 @@ public class AdminAuthResource {
     @EJB
     private AuthServiceAPI authService;
 
-    // Helper method to consolidate success/error response formatting
     private Response respond(RestAPIStructure.ApiResponse<?> apiResponse) {
         if (apiResponse.isStatus()) {
             return ResponseFormatter.success(apiResponse.getStatus_code(), apiResponse.getMessage(), apiResponse.getData());
@@ -37,8 +36,6 @@ public class AdminAuthResource {
         }
     }
 
-    // C - Register New Admin (Hierarchical Creation)
-    // The creator's role is checked inside AuthServiceAPI via the Authorization header
     @POST
     @Path("/register")
     public Response register(@Context HttpHeaders headers, Admin admin) {
@@ -47,7 +44,6 @@ public class AdminAuthResource {
         return respond(apiResponse);
     }
 
-    // R - Login Admin
     @POST
     @Path("/login")
     public Response login(Map<String, String> loginData) {
@@ -55,7 +51,6 @@ public class AdminAuthResource {
         return respond(apiResponse);
     }
 
-    // U - Update Admin Profile (Requires Authentication)
     @PUT
     @Path("/profile")
     public Response updateProfile(Admin updatedAdmin, @Context HttpHeaders headers) {
@@ -64,7 +59,6 @@ public class AdminAuthResource {
         return respond(apiResponse);
     }
 
-    // U - Update Admin Password (Requires Authentication)
     @PUT
     @Path("/updatePassword")
     public Response updatePassword(Map<String, String> requestBody, @Context HttpHeaders headers) {
@@ -75,7 +69,6 @@ public class AdminAuthResource {
         return respond(apiResponse);
     }
 
-    // D - Deactivate/Delete Admin Account (Requires Authentication)
     @DELETE
     @Path("/delete")
     public Response deleteAccount(@Context HttpHeaders headers) {

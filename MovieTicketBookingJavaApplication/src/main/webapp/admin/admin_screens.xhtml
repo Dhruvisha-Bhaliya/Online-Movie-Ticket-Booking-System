@@ -1,96 +1,115 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core"
-      template="/WEB-INF/admin/Admin_panel.xhtml">
-    <h:head>
-        <title>Admin - Manage Screens</title>
-    </h:head>
-    <h:body>
-        <div class="container">
-            <h1>Screen Management</h1>
-            <h:messages globalOnly="true" style="color: red;"/>
+<ui:composition 
+    template="/WEB-INF/templates/adminlayout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="jakarta.faces.html"
+    xmlns:f="jakarta.faces.core"
+    xmlns:ui="jakarta.faces.facelets">
 
-            <div class="form-panel">
-                <h2>#{adminScreenController.editMode ? 'Edit Screen' : 'Add New Screen'}</h2>
-                <h:form>
-                    <h:panelGrid columns="3" cellpadding="5">
+    <!-- PAGE TITLE -->
+    <ui:define name="title">
+        Manage Screens
+    </ui:define>
 
-                        <h:outputLabel for="theater" value="Select Theater:" />
-                        <h:selectOneMenu id="theater" 
-                                         value="#{adminScreenController.currentScreen.theaterId}" 
-                                         converter="#{theaterConverter}"
-                                         required="true" 
-                                         requiredMessage="Theater selection is required.">
-                            <f:selectItem itemLabel="--- Select Theater ---" itemValue="#{null}" noSelectionOption="true"/>
+    <!-- PAGE CONTENT -->
+    <ui:define name="content">
 
-                            <f:selectItems value="#{adminScreenController.theaterList}" 
-                                           var="t" 
-                                           itemLabel="#{t.theaterName} (#{t.city})" 
-                                           itemValue="#{t}"/>
+        <h1>Screen Management</h1>
+        <h:messages globalOnly="true" style="color:red"/>
 
+        <!-- FORM PANEL -->
+        <div class="form-panel">
+            <h2>#{adminScreenController.editMode ? 'Edit Screen' : 'Add New Screen'}</h2>
 
-                        </h:selectOneMenu>
-                        <h:message for="theater" style="color: red"/>
-
-                        <h:outputLabel for="screenName" value="Screen Name:" />
-                        <h:inputText id="screenName" value="#{adminScreenController.currentScreen.screenName}" 
-                                     required="true" requiredMessage="Screen Name is required." />
-                        <h:message for="screenName" style="color: red"/>
-
-                        <h:outputLabel for="number" value="Screen Number:" />
-                        <h:inputText id="number" value="#{adminScreenController.currentScreen.screenNumber}" 
-                                     required="true" requiredMessage="Screen Number is required." />
-                        <h:message for="number" style="color: red"/>
-
-                        <h:outputLabel for="capacity" value="Capacity:" />
-                        <h:inputText id="capacity" value="#{adminScreenController.currentScreen.capacity}" 
-                                     required="true" requiredMessage="Capacity is required." />
-                        <h:message for="capacity" style="color: red"/>
-
-                        <h:inputHidden value="#{adminScreenController.currentScreen.screenId}" />
-
-                        <h:commandButton value="#{adminScreenController.editMode ? 'Update Screen' : 'Add Screen'}" 
-                                         action="#{adminScreenController.saveScreen()}" 
-                                         styleClass="button edit-btn"/>
-
-                        <h:commandButton value="Cancel/Reset" 
-                                         action="#{adminScreenController.resetForm()}" 
-                                         immediate="true" 
-                                         styleClass="button reset-btn"/>
-
-                    </h:panelGrid>
-                </h:form>
-            </div>
-
-            <h2>Existing Screens</h2>
             <h:form>
-                <h:dataTable value="#{adminScreenController.screenList}" var="screen" styleClass="data-table">
+                <h:panelGrid columns="3" cellpadding="5">
 
-                    <h:column><f:facet name="header">ID</f:facet>#{screen.screenId}</h:column>
-                    <h:column><f:facet name="header">Screen Name.</f:facet>#{screen.screenName}</h:column>
-                    <h:column><f:facet name="header">Screen No.</f:facet>#{screen.screenNumber}</h:column>
-                    <h:column><f:facet name="header">Capacity</f:facet>#{screen.capacity}</h:column>
+                    <h:outputLabel for="theater" value="Select Theater:" />
+                    <h:selectOneMenu id="theater"
+                                     value="#{adminScreenController.currentScreen.theaterId}"
+                                     converter="#{theaterConverter}"
+                                     required="true"
+                                     requiredMessage="Theater selection is required.">
 
-                    <h:column>
-                        <f:facet name="header">Belongs to Theater</f:facet>
-                            #{screen.theaterId.theaterName}
-                    </h:column>
+                        <f:selectItem itemLabel="--- Select Theater ---" 
+                                      itemValue="#{null}"
+                                      noSelectionOption="true"/>
 
-                    <h:column>
-                        <f:facet name="header">Action</f:facet>
-                        <h:commandLink value="Edit" 
-                                       action="#{adminScreenController.editScreen(screen)}" 
-                                       styleClass="button edit-btn" />
+                        <f:selectItems value="#{adminScreenController.theaterList}"
+                                       var="t"
+                                       itemLabel="#{t.theaterName} (#{t.city})"
+                                       itemValue="#{t}"/>
+                    </h:selectOneMenu>
+                    <h:message for="theater" style="color:red"/>
 
-                        <h:commandLink value="Delete" 
-                                       action="#{adminScreenController.deleteScreen(screen)}" 
-                                       onclick="return confirm('Are you sure?');" 
-                                       styleClass="button delete-btn"/>
-                    </h:column>
-                </h:dataTable>
+                    <h:outputLabel for="screenName" value="Screen Name:" />
+                    <h:inputText id="screenName" 
+                                 value="#{adminScreenController.currentScreen.screenName}"
+                                 required="true"
+                                 requiredMessage="Screen Name is required." />
+                    <h:message for="screenName" style="color:red"/>
+
+                    <h:outputLabel for="number" value="Screen Number:" />
+                    <h:inputText id="number" 
+                                 value="#{adminScreenController.currentScreen.screenNumber}"
+                                 required="true"
+                                 requiredMessage="Screen Number is required." />
+                    <h:message for="number" style="color:red"/>
+
+                    <h:outputLabel for="capacity" value="Capacity:" />
+                    <h:inputText id="capacity" 
+                                 value="#{adminScreenController.currentScreen.capacity}"
+                                 required="true"
+                                 requiredMessage="Capacity is required." />
+                    <h:message for="capacity" style="color:red"/>
+
+                    <h:inputHidden value="#{adminScreenController.currentScreen.screenId}" />
+
+                    <h:commandButton value="#{adminScreenController.editMode ? 'Update Screen' : 'Add Screen'}"
+                                     action="#{adminScreenController.saveScreen()}"
+                                     styleClass="button edit-btn"/>
+
+                    <h:commandButton value="Cancel/Reset"
+                                     action="#{adminScreenController.resetForm()}"
+                                     immediate="true"
+                                     styleClass="button reset-btn"/>
+
+                </h:panelGrid>
             </h:form>
         </div>
-    </h:body>
-</html>
+
+        <h2>Existing Screens</h2>
+
+        <h:form>
+            <h:dataTable value="#{adminScreenController.screenList}" 
+                         var="screen"
+                         styleClass="data-table">
+
+                <h:column><f:facet name="header">ID</f:facet>#{screen.screenId}</h:column>
+                <h:column><f:facet name="header">Screen Name</f:facet>#{screen.screenName}</h:column>
+                <h:column><f:facet name="header">Screen No</f:facet>#{screen.screenNumber}</h:column>
+                <h:column><f:facet name="header">Capacity</f:facet>#{screen.capacity}</h:column>
+
+                <h:column>
+                    <f:facet name="header">Theater</f:facet>
+                        #{screen.theaterId.theaterName}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Action</f:facet>
+
+                    <h:commandLink value="Edit"
+                                   action="#{adminScreenController.editScreen(screen)}"
+                                   styleClass="button edit-btn"/>
+
+                    <h:commandLink value="Delete"
+                                   action="#{adminScreenController.deleteScreen(screen)}"
+                                   onclick="return confirm('Are you sure?')"
+                                   styleClass="button delete-btn"/>
+                </h:column>
+
+            </h:dataTable>
+        </h:form>
+
+    </ui:define>
+
+</ui:composition>

@@ -6,24 +6,19 @@ package AdminBean;
 
 import entity.User;
 import jakarta.ejb.Local;
-import java.util.List;
 
 /**
  *
  * @author DELL
  */
 @Local
-public interface UserServiceLocal {
+public interface UserRegistrationLoginBeanLocal {
 
-    void addUser(User user);
+    boolean register(String username, String email, String password, Long phone);
+
+    User login(String email, String password);
 
     User findByEmail(String email);
 
-    User findById(Long id);
-
-    List<User> findAll();
-
-    User updateUser(User user);
-
-    void deleteUser(User user);
+    boolean updatePassword(String email, String newPassword);
 }

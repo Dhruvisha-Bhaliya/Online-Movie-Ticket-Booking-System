@@ -22,13 +22,11 @@ public class UserService implements UserServiceLocal {
     @PersistenceContext(unitName = "myMovie")
     private EntityManager em;
 
-    // CREATE
     @Override
     public void addUser(User user) {
         em.persist(user);
     }
 
-    // READ
     @Override
     public User findByEmail(String email) {
         try {
@@ -51,13 +49,11 @@ public class UserService implements UserServiceLocal {
         return q.getResultList();
     }
 
-    // UPDATE
     @Override
     public User updateUser(User user) {
-        return em.merge(user); // Return merged entity
+        return em.merge(user);
     }
 
-    // DELETE
     @Override
     public void deleteUser(User user) {
         User managed = em.find(User.class, user.getUserId());

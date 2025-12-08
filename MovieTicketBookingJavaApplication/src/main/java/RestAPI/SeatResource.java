@@ -21,7 +21,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import user_bean.ScreenBeanLocal;
@@ -45,7 +44,6 @@ public class SeatResource {
     @Context
     private UriInfo uriInfo;
 
-    // ✅ Anyone can view all seats
     @GET
     public Response getAll() {
         try {
@@ -56,7 +54,6 @@ public class SeatResource {
         }
     }
 
-    // ✅ Get a specific seat by ID
     @GET
     @Path("{id}")
     public Response getById(@PathParam("id") Long id) {
@@ -68,14 +65,10 @@ public class SeatResource {
         return ResponseFormatter.success(200, "Seat fetched successfully", s);
     }
 
-    // Assuming you have a ScreenBeanLocal to fetch the screen
-// @EJB
-// private ScreenBeanLocal screenBean; 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response create(Seat seat) {
         try {
-            // --- 1. Validate and retrieve Screen ID from the payload ---
             Screen screenFromPayload = seat.getScreenId();
 
             if (screenFromPayload == null || screenFromPayload.getScreenId() == null) {
@@ -83,25 +76,17 @@ public class SeatResource {
             }
 
             Long screenId = screenFromPayload.getScreenId();
-
-            // --- 2. Fetch the actual managed Screen entity from the database ---
             Screen managedScreen = screenBean.findScreen(screenId); // Now this works!
 
             if (managedScreen == null) {
                 return ResponseFormatter.error(404, "Screen not found", "Screen with ID " + screenId + " does not exist.");
             }
-
-            // --- 3. Set the managed Screen entity onto the Seat object ---
             seat.setScreenId(managedScreen);
-
-            // --- 4. Persist the Seat entity ---
             Date now = new Date();
             seat.setCreatedAt(now);
             seat.setUpdatedAt(now);
 
             seatBean.createSeat(seat);
-
-            // Success Path
             return ResponseFormatter.success(
                     201,
                     "Seat created successfully",
@@ -109,13 +94,10 @@ public class SeatResource {
             );
 
         } catch (Exception e) {
-            // Error Path: Database or EJB exception
             return ResponseFormatter.error(400, "Failed to create seat", e.getMessage());
         }
     }
 
-    // ✅ Update existing seat — only ADMIN, SUPER_ADMIN, MANAGER
-    // ✅ Update existing seat — only ADMIN, SUPER_ADMIN, MANAGER
     @PUT
     @Path("{id}")
     public Response update(@PathParam("id") Long id, Seat updated) {
@@ -127,49 +109,29 @@ public class SeatResource {
 
         try {
             updated.setSeatId(id);
-
-            // 2. Determine the Screen entity to use for the update
             Screen screenToPersist;
-
-            // Check if the client provided a new Screen object/ID
             if (updated.getScreenId() != null && updated.getScreenId().getScreenId() != null) {
-
                 Long newScreenId = updated.getScreenId().getScreenId();
-
-                // Fetch the actual managed Screen entity for the new ID
                 Screen managedNewScreen = screenBean.findScreen(newScreenId);
 
                 if (managedNewScreen == null) {
-                    // Error Path: New screen ID is invalid
                     return ResponseFormatter.error(404, "Invalid Screen ID", "The new Screen ID provided (" + newScreenId + ") does not exist.");
                 }
                 screenToPersist = managedNewScreen;
 
             } else {
-                // No new screen ID provided, so use the existing, managed one.
-                // This is crucial to prevent the screenId column from becoming null.
                 screenToPersist = existing.getScreenId();
             }
-
-            // Final assignment of the managed Screen entity
             updated.setScreenId(screenToPersist);
-
-            // 3. Update timestamps and preserve creation time
             updated.setCreatedAt(existing.getCreatedAt());
             updated.setUpdatedAt(new Date());
-
-            // 4. Call the EJB update method
             seatBean.editSeat(updated);
-
             return ResponseFormatter.success(200, "Seat updated successfully", updated);
-
         } catch (Exception e) {
-            // General error path catches transaction-related exceptions
             return ResponseFormatter.error(400, "Failed to update seat", e.getMessage());
         }
     }
 
-    // ✅ Delete a seat — only ADMIN or SUPER_ADMIN
     @DELETE
     @Path("{id}")
     public Response delete(@PathParam("id") Long id) {
@@ -186,16 +148,12 @@ public class SeatResource {
         }
     }
 
-    // ✅ Get all seats by screen (for filter dropdown in UI)
     @GET
     @Path("/screen/{screenId}")
     public Response getSeatsByScreen(@PathParam("screenId") Long screenId) {
         try {
-            // ✅ Create a Screen object using the provided screenId
             Screen screen = new Screen();
             screen.setScreenId(screenId);
-
-            // ✅ Pass the Screen object to the bean method
             List<Seat> seats = seatBean.findSeatsByScreen(screen);
 
             return ResponseFormatter.success(200, "Seats fetched for screen successfully", seats);
@@ -204,7 +162,6 @@ public class SeatResource {
         }
     }
 
-    // ✅ Get seats by screen and status (Available, Booked, Under Maintenance)
     @GET
     @Path("/filter")
     @Produces(MediaType.APPLICATION_JSON)

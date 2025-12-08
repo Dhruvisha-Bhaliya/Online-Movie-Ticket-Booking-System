@@ -5,9 +5,7 @@
 package RestAPI;
 
 import RestAPIStructure.ResponseFormatter;
-import RestAPIStructure.SecurityRoles;
 import entity.Showmovie;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -22,7 +20,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
-import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import user_bean.ShowBeanLocal;
@@ -43,7 +40,6 @@ public class ShowResource {
     @Context
     private UriInfo uriInfo;
 
-    // ✅ Anyone can view all shows
     @GET
     public Response getAll() {
         try {
@@ -54,7 +50,6 @@ public class ShowResource {
         }
     }
 
-    // ✅ Get a specific show by ID
     @GET
     @Path("{id}")
     public Response getById(@PathParam("id") Long id) {
@@ -86,7 +81,6 @@ public class ShowResource {
         }
     }
 
-    // ✅ Update existing show — only ADMIN, SUPER_ADMIN, MANAGER
     @PUT
     @Path("{id}")
     public Response update(@PathParam("id") Long id, Showmovie updatedData) {
@@ -114,7 +108,6 @@ public class ShowResource {
         }
     }
 
-    // ✅ Delete a show — only ADMIN or SUPER_ADMIN
     @DELETE
     @Path("{id}")
     public Response delete(@PathParam("id") Long id) {
@@ -131,7 +124,6 @@ public class ShowResource {
         }
     }
 
-    // ✅ Get shows by Movie ID (public access)
     @GET
     @Path("/movie/{movieId}")
     public Response getShowsByMovie(@PathParam("movieId") Long movieId) {
@@ -143,7 +135,6 @@ public class ShowResource {
         }
     }
 
-    // ✅ Get available show dates by movie
     @GET
     @Path("/movie/{movieId}/dates")
     public Response getAvailableDates(@PathParam("movieId") Long movieId) {
@@ -155,7 +146,6 @@ public class ShowResource {
         }
     }
 
-    // ✅ Get shows by movie, date, and language (for filtering)
     @GET
     @Path("/movie/{movieId}/filter")
     public Response getShowsByMovieDateLanguage(

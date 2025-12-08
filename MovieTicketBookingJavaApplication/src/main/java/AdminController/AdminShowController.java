@@ -51,7 +51,6 @@ public class AdminShowController implements Serializable {
         screenList = screenBean.findAllScreen();
     }
 
-    // --- CRUD Action Methods (Standard pattern) ---
     public String saveShow() {
 
         if (!editMode) {
@@ -89,7 +88,6 @@ public class AdminShowController implements Serializable {
         editMode = false;
     }
 
-    // --- Getters and Setters ---
     public Showmovie getCurrentShow() {
         return currentShow;
     }

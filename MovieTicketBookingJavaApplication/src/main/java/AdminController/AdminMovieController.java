@@ -47,32 +47,18 @@ public class AdminMovieController implements Serializable {
 
     public String addMovie() {
         try {
-            // --- 1. Validate File and Prevent NPE ---
             if (uploadedFile == null || uploadedFile.getSize() == 0) {
                 FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_ERROR, "Upload Error", "Please select a poster image."));
                 return null;
             }
-
-            // --- 2. Define Paths ---
             String fileName = uploadedFile.getSubmittedFileName();
-
-            // **A. The Relative Path for the Browser/Database (Correct format)**
             String relativeWebPath = fileName;
-
-            // **B. The Absolute Path for the Server's File System**
-            // Use getRealPath() as the primary location, but be aware of its unreliability.
             String contextPath = FacesContext.getCurrentInstance().getExternalContext()
                     .getRealPath("");
-
-            // Fallback or Error Check for getRealPath() failure
             if (contextPath == null) {
-                // If the server can't map the path, we must use a fixed temporary location.
-                // For now, re-throwing a fatal error as the image must be publicly accessible.
                 throw new IOException("Server cannot resolve the web content path for uploads.");
             }
-
-            // --- 3. Save File to Server Path ---
             File savedir = new File(contextPath + File.separator + "resources" + File.separator + "images");
             if (!savedir.exists()) {
                 if (!savedir.mkdirs()) {
@@ -80,7 +66,6 @@ public class AdminMovieController implements Serializable {
 
                 }
             }
-
             File targetFile = new File(savedir, fileName);
             try (java.io.InputStream input = uploadedFile.getInputStream(); java.io.OutputStream output = new java.io.FileOutputStream(targetFile)) {
 
@@ -96,12 +81,8 @@ public class AdminMovieController implements Serializable {
             movieBean.addMovie(movie);
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Movie added Successfully!"));
-
-            // 6. Reset Bean State for new entry/form clearance
             movie = new Movie();
             uploadedFile = null;
-
-            // 7. Redirect to the movie list page
             return "admin_movies.xhtml?faces-redirect=true";
 
         } catch (Exception e) {
@@ -121,11 +102,8 @@ public class AdminMovieController implements Serializable {
 
     public String updateMovie() {
         try {
-            // If a new file is uploaded, save it and update the image path
             if (uploadedFile != null && uploadedFile.getSize() > 0) {
                 String fileName = uploadedFile.getSubmittedFileName();
-
-                // Get the server path
                 String contextPath = FacesContext.getCurrentInstance()
                         .getExternalContext().getRealPath("");
 
@@ -143,17 +121,14 @@ public class AdminMovieController implements Serializable {
                     }
                 }
 
-                // Update the movie's poster path
                 movie.setPosterImagePath(fileName);
             }
 
-            // Update the database record
             movieBean.updateMovie(movie);
 
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Movie updated successfully!"));
 
-            // Reset state and redirect back
             movie = new Movie();
             uploadedFile = null;
             return "admin_movies.xhtml?faces-redirect=true";
