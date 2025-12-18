@@ -1,0 +1,112 @@
+<ui:composition
+    template="/WEB-INF/templates/stafflayout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="jakarta.faces.html"
+    xmlns:f="jakarta.faces.core"
+    xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="title">Staff - Manage Show</ui:define>
+
+    <ui:define name="content">
+
+        <div class="container">
+
+            <h1 class="page-title">Show Management</h1>
+            <h:messages globalOnly="true" styleClass="msg-error"/>
+
+            <!-- ================= TABLE ================= -->
+            <div class="card">
+                <h2 class="card-title">Existing Shows</h2>
+
+                <h:form id="showTableForm">
+                    <h:dataTable value="#{adminShowController.showList}"
+                                 var="show"
+                                 styleClass="data-table"
+                                 id="showTable">
+
+                        <h:column>
+                            <f:facet name="header">ID</f:facet>
+                                #{show.showId}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Movie</f:facet>
+                                #{show.movieId.movieTitle}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Screen</f:facet>
+                                #{show.screenId.screenNumber}
+                            @ #{show.screenId.theaterId.theaterName}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Time</f:facet>
+                            <h:outputText value="#{show.showTime}">
+                                <f:convertDateTime pattern="MMM dd, yyyy HH:mm"/>
+                            </h:outputText>
+                        </h:column>
+
+                    </h:dataTable>
+                </h:form>
+            </div>
+
+        </div>
+
+        <!-- ================= CSS ================= -->
+        <style>
+            .page-title {
+                font-size: 26px;
+                margin-bottom: 15px;
+            }
+            .card {
+                background: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+                margin-bottom: 25px;
+            }
+            .card-title {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .data-table th {
+                background: #F1F5F9;
+                padding: 8px;
+                text-align: left;
+            }
+            .data-table td {
+                padding: 8px;
+                border-bottom: 1px solid #E5E7EB;
+            }
+            .btn {
+                padding: 6px 14px;
+                border-radius: 6px;
+                border: none;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .btn-primary {
+                background: #2563EB;
+                color: #fff;
+            }
+            .btn-secondary {
+                background: #E5E7EB;
+                color: #111827;
+            }
+            .btn-edit {
+                background: #DBEAFE;
+                color: #1D4ED8;
+            }
+            .btn-danger {
+                background: #FEE2E2;
+                color: #B91C1C;
+            }
+        </style>
+
+    </ui:define>
+</ui:composition>

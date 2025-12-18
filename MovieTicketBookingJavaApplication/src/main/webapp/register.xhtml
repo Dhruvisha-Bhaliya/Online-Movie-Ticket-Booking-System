@@ -8,6 +8,7 @@
     <h:head>
         <title>MovieBooker - Register</title>
         <h:outputStylesheet library="css" name="register.css"/>
+        <h:outputScript library="js" name="script.js" />
     </h:head>
 
     <h:body>
@@ -42,6 +43,7 @@
                                      value="#{userAuthBean.email}"
                                      required="true"
                                      requiredMessage="Please enter your email"
+                                     validator="emailValidator"
                                      styleClass="input-field"/>
                         <h:message for="email" styleClass="error-message"/>
                     </div>
@@ -49,14 +51,23 @@
                     <!-- PASSWORD -->
                     <div class="form-group">
                         <h:outputLabel for="password" value="Password" />
+
                         <h:inputSecret id="password"
                                        value="#{userAuthBean.password}"
                                        required="true"
                                        requiredMessage="Please enter your password"
-                                       styleClass="input-field"/>
+                                       validator="passwordValidator"
+                                       styleClass="input-field"
+                                       onkeyup="checkStrength(this.value)" />
                         <h:message for="password" styleClass="error-message"/>
-                    </div>
 
+                        <!-- Strength Meter -->
+                        <div id="password-strength" class="strength-meter">
+                            <div id="strength-bar"></div>
+                        </div>
+
+                        <span id="strength-text" class="strength-text"></span>
+                    </div>
                     <!-- PHONE -->
                     <div class="form-group">
                         <h:outputLabel for="phone" value="Phone Number" />
@@ -64,10 +75,10 @@
                                      value="#{userAuthBean.phoneno}"
                                      required="true"
                                      requiredMessage="Please enter your phone number"
+                                     validator="phoneValidator"
                                      styleClass="input-field"/>
                         <h:message for="phone" styleClass="error-message"/>
                     </div>
-
                     <!-- FORGOT PASSWORD LINK -->
                     <div class="forgot-password-container">
                         <h:link outcome="forgotPassword.xhtml" styleClass="forgot-link">

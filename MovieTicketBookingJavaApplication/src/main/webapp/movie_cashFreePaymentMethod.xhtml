@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+
+
+    <h:head>
+        <title>Processing Payment...</title>
+        <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+
+        <style>
+            body {
+                font-family: "Roboto", Arial, sans-serif;
+                background-color: #f7f7f7;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+
+            .main-content {
+                width: 100%;
+                max-width: 900px;
+                background-color: #ffffff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                min-height: 100vh;
+                margin: auto;
+                border-radius:10px;
+                padding: 0 0 50px 0;
+            }
+
+            .top-header {
+                background-color: #ffffff;
+                padding: 15px 20px;
+                border-bottom: 1px solid #eeeeee;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .top-header h2 {
+                font-size: 18px;
+                font-weight: 600;
+                margin: 0;
+                color: #1f1f1f;
+            }
+            .back-icon {
+                font-size: 20px;
+                cursor: default;
+                color: #ccc;
+            }
+
+            .payment-redirect-content {
+                text-align: center;
+                padding: 50px 20px;
+            }
+            .payment-redirect-content h2 {
+                color: #f84464;
+                font-weight: 600;
+                margin-bottom: 10px;
+                font-size: 24px;
+            }
+            .payment-redirect-content p {
+                color: #666;
+                font-size: 16px;
+                margin-top: 5px;
+            }
+            .loader {
+                width: 60px;
+                height: 60px;
+                margin: 30px auto;
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #f84464;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </h:head>
+
+    <h:body>
+        <div class="main-content">
+
+            <div class="top-header">
+                <span class="back-icon">&#x2190;</span>
+                <h2>Secure Payment Gateway</h2>
+            </div>
+
+            <div class="payment-redirect-content">
+                <h2>Initiating Secure Payment...</h2>
+                <div class="loader"></div>
+                <p>Please wait while we securely connect you to Cashfree.</p>
+                <p>Do not refresh this page or press the back button.</p>
+            </div>
+
+           
+                <h:outputScript>
+    const paymentSessionId = "#{cashfreePaymentController.cftoken}";
+
+    console.log("paymentSessionId:", paymentSessionId);
+
+    if (!paymentSessionId) {
+        alert("Payment session missing!");
+        window.location.href = "confirmBooking.xhtml";
+    } else {
+        const cashfree = new Cashfree({
+            mode: "sandbox" // use "production" later
+        });
+
+        cashfree.checkout({
+            paymentSessionId: paymentSessionId,
+            redirectTarget: "_self"
+        });
+    }
+</h:outputScript>
+
+        </div>
+    </h:body>
+</html>

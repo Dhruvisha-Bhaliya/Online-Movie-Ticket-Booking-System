@@ -3,10 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-       template="/WEB-INF/admin/Admin_panel.xhtml">
+      template="/WEB-INF/admin/Admin_panel.xhtml">
     <h:head>
         <title>Add Movie</title>
-        
+
         <style>
             .form-container {
                 width: 600px;
@@ -36,18 +36,34 @@
                 min-height: 100px;
                 resize: vertical;
             }
-            .button-group {
-                text-align: right;
-                margin-top: 20px;
-            }
             .button-group .h-button {
-                padding: 10px 20px;
-                background-color: #e50914;
-                color: white;
-                border: none;
-                border-radius: 4px;
+                padding: 10px 22px;              /* Bigger padding for modern look */
+                border-radius: 8px;              /* Rounded corners */
+                border: none;                     /* Remove default border */
                 cursor: pointer;
+                font-weight: 600;
                 text-decoration: none;
+                transition: 0.2s;
+                font-size: 14px;
+            }
+
+            /* Add Movie button */
+            .button-group .h-button:first-child {
+                background-color: #4FB5FF;       /* Light blue */
+                color: white;
+            }
+            .button-group .h-button:first-child:hover {
+                background-color: #3AAAFE;       /* Slightly darker on hover */
+            }
+
+            /* Back to Movies link/button */
+            .button-group .h-button:last-child {
+                background-color: #EDF2F7;       /* Light gray */
+                color: #2B2D42;
+                margin-left: 10px;
+            }
+            .button-group .h-button:last-child:hover {
+                background-color: #E2E8F0;       /* Slightly darker gray on hover */
             }
         </style>
     </h:head>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="jakarta.faces.html"
+    xmlns:f="jakarta.faces.core"
+    xmlns:ui="jakarta.faces.facelets"
+    template="/WEB-INF/templates/adminlayout.xhtml">
+
+    <ui:define name="title">Manage Roles</ui:define>
+
+    <ui:define name="content">
+
+        <!-- ================= STYLES ================= -->
+        <style>
+            .card {
+                background: #ffffff;
+                padding: 24px;
+                border-radius: 14px;
+                box-shadow: 0 12px 30px rgba(0,0,0,.08);
+            }
+
+            .title {
+                font-size: 20px;
+                font-weight: 700;
+                color: #1e3a8a;
+                margin-bottom: 18px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th {
+                background: #f1f5ff;
+                color: #1e40af;
+                padding: 14px;
+                font-weight: 600;
+            }
+
+            td {
+                padding: 14px;
+                border-bottom: 1px solid #e5e7eb;
+                vertical-align: middle;
+            }
+
+            .badge {
+                background: #e0e7ff;
+                color: #1e3a8a;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 13px;
+            }
+
+            .btn {
+                border: none;
+                padding: 7px 14px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 600;
+                color: #fff;
+            }
+
+            .edit-btn {
+                background: #2563eb;
+            }
+
+            .save-btn {
+                background: #16a34a;
+            }
+
+            .cancel-btn {
+                background: #6b7280;
+            }
+
+            .btn:hover {
+                opacity: .9;
+            }
+
+            .input {
+                width: 100%;
+                padding: 8px 10px;
+                border-radius: 8px;
+                border: 1px solid #c7d2fe;
+            }
+        </style>
+
+        <!-- ================= CONTENT ================= -->
+        <h:form>
+
+            <div class="card">
+                <div class="title">
+                    <i class="fa fa-user-shield"></i> Manage Roles
+                </div>
+
+                <h:dataTable value="#{adminRoleUserBean.roles}" var="r">
+
+                    <!-- ROLE -->
+                    <h:column>
+                        <f:facet name="header">Role</f:facet>
+                        <span class="badge">#{r.role}</span>
+                    </h:column>
+
+                    <!-- DESCRIPTION -->
+                    <h:column>
+                        <f:facet name="header">Description</f:facet>
+
+                        <!-- VIEW MODE -->
+                        <h:panelGroup rendered="#{adminRoleUserBean.editRoleId ne r.roleId}">
+                            #{r.description}
+                        </h:panelGroup>
+
+                        <!-- EDIT MODE -->
+                        <h:panelGroup rendered="#{adminRoleUserBean.editRoleId eq r.roleId}">
+                            <h:inputText value="#{r.description}"
+                                         styleClass="input"/>
+                        </h:panelGroup>
+                    </h:column>
+
+                    <!-- ACTION -->
+                    <h:column>
+                        <f:facet name="header">Action</f:facet>
+
+                        <!-- EDIT -->
+                        <h:commandButton
+                            rendered="#{adminRoleUserBean.editRoleId ne r.roleId}"
+                            value="Edit"
+                            action="#{adminRoleUserBean.startEdit(r)}"
+                            styleClass="btn edit-btn"/>
+
+                        <!-- SAVE -->
+                        <h:commandButton
+                            rendered="#{adminRoleUserBean.editRoleId eq r.roleId}"
+                            value="Save"
+                            action="#{adminRoleUserBean.saveRole(r)}"
+                            styleClass="btn save-btn"/>
+
+                        <!-- CANCEL -->
+                        <h:commandButton
+                            rendered="#{adminRoleUserBean.editRoleId eq r.roleId}"
+                            value="Cancel"
+                            action="#{adminRoleUserBean.cancelEdit}"
+                            styleClass="btn cancel-btn"
+                            immediate="true"/>
+                    </h:column>
+
+                </h:dataTable>
+            </div>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>

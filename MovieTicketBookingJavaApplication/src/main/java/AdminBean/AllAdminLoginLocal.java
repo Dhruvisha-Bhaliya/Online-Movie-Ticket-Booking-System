@@ -17,18 +17,28 @@ import java.util.List;
 public interface AllAdminLoginLocal {
 
     Admin loginAdmin(String email, String password);
-    // ROLE OPERATIONS
 
     List<RoleMaster> getAllRoles();
 
-    // ADMIN OPERATIONS
     List<Admin> getAllAdmins();
 
-    void createAdmin(String name, String email, String password, Long phone, Long roleId);
+    List<RoleMaster> getAllowedRoles(Long loggedRoleId);
+
+    List<Admin> getAdminsByRole(Long loggedRoleId);
+
+    boolean createAdmin(Admin creator,
+            String name,
+            String email,
+            String password,
+            Long phone,
+            Long roleId);
 
     void deleteAdmin(Long id);
 
-    // You can add update logic if required
-//    void updateAdmin(Admin admin);
+    Admin findAdminByEmail(String email);
+
+    void updateAdmin(Admin admin);
+
+    void updateRoleDescription(Long roleId, String description);
 
 }

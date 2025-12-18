@@ -1,0 +1,177 @@
+<ui:composition
+    template="/WEB-INF/templates/managerlayout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="jakarta.faces.html"
+    xmlns:f="jakarta.faces.core"
+    xmlns:ui="jakarta.faces.facelets">
+    <ui:define name="title">Manage Screens</ui:define>
+
+    <ui:define name="content">
+
+        <div class="page-container">
+
+            <!-- PAGE TITLE -->
+            <h2 class="page-title">Screen Management</h2>
+            <div class="card">
+                <h3 class="card-title">Existing Screens</h3>
+
+                <h:form id="screenForm">
+                    <h:dataTable value="#{adminScreenController.screenList}"
+                                 var="s"
+                                 styleClass="movie-table"
+                                 headerClass="table-header"
+                                 rowClasses="row-even,row-odd">
+
+                        <h:column>
+                            <f:facet name="header">ID</f:facet>
+                                #{s.screenId}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Screen</f:facet>
+                                #{s.screenName}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">No</f:facet>
+                                #{s.screenNumber}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Capacity</f:facet>
+                                #{s.capacity}
+                        </h:column>
+
+                        <h:column>
+                            <f:facet name="header">Theater</f:facet>
+                                #{s.theaterId.theaterName}
+                        </h:column>
+                    </h:dataTable>
+                </h:form>             
+            </div>
+        </div>
+
+        <!-- =================== CSS =================== -->
+        <style>
+            .page-container {
+                padding: 30px;
+                background: #F5F7FB;
+                font-family: "Segoe UI", sans-serif;
+            }
+
+            .page-title {
+                font-size: 28px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: #1F2937;
+            }
+
+            .card {
+                background: #fff;
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 25px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            }
+
+            .card-title {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 15px;
+                color: #374151;
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                margin-bottom: 5px;
+                display: block;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 8px;
+                border-radius: 6px;
+                border: 1px solid #D1D5DB;
+            }
+
+            .form-actions {
+                margin-top: 15px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                margin-right: 6px;
+            }
+
+            .btn.primary {
+                background: #2563EB;
+                color: #fff;
+            }
+            .btn.secondary {
+                background: #E5E7EB;
+            }
+            .btn.edit {
+                background: #F59E0B;
+                color: #fff;
+            }
+            .btn.delete {
+                background: #EF4444;
+                color: #fff;
+            }
+
+            .movie-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .table-header {
+                background: #EEF2FF;
+                font-weight: 600;
+            }
+
+            .movie-table td {
+                padding: 12px;
+                text-align: center;
+                border-bottom: 1px solid #E5E7EB;
+            }
+
+            .row-even {
+                background: #FFFFFF;
+            }
+            .row-odd {
+                background: #F9FAFB;
+            }
+
+            .pagination {
+                margin-top: 15px;
+                text-align: right;
+            }
+
+            .pagination button {
+                background: #2563EB;
+                color: #fff;
+                padding: 6px 12px;
+                border-radius: 6px;
+                border: none;
+                margin-left: 6px;
+                cursor: pointer;
+            }
+
+            .pagination span {
+                font-weight: 600;
+                margin: 0 8px;
+            }
+        </style>
+    </ui:define>
+</ui:composition>

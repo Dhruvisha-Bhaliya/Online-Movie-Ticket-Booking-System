@@ -1,0 +1,132 @@
+<ui:composition template="/WEB-INF/templates/ad_minlayout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="title">Admin Dashboard</ui:define>
+
+    <ui:define name="content">
+
+        <div class="dashboard-container">
+
+            <h2 class="dashboard-title">Admin Overview</h2>
+
+            <!-- ===== SUMMARY CARDS ===== -->
+            <div class="cards-row">
+
+                <!-- TOTAL MOVIES -->
+                <div class="card"
+                     onclick="location.href = '#{request.contextPath}/ad_min/ad_min_movies.xhtml'">
+                    <div class="card-header">
+                        <span class="card-title">Movies Available</span>
+                        <i class="fa fa-film card-icon"></i>
+                    </div>
+                    <div class="card-value">
+                        <h:outputText value="#{sDashBoardBean.totalMovies}" />
+                    </div>
+                </div>
+
+                <!-- TOTAL THEATERS -->
+                <div class="card"
+                     onclick="location.href = '#{request.contextPath}/ad_min/ad_min_theaters.xhtml'">
+                    <div class="card-header">
+                        <span class="card-title">Active Theaters</span>
+                        <i class="fa fa-building card-icon"></i>
+                    </div>
+                    <div class="card-value">
+                        <h:outputText value="#{sDashBoardBean.totalTheaters}" />
+                    </div>
+                </div>
+
+                <!-- TOTAL SCREENS -->
+                <div class="card"
+                     onclick="location.href = '#{request.contextPath}/ad_min/ad_min_screens.xhtml'">
+                    <div class="card-header">
+                        <span class="card-title">Total Screens</span>
+                        <i class="fa fa-tv card-icon"></i>
+                    </div>
+                    <div class="card-value">
+                        <h:outputText value="#{sDashBoardBean.totalScreens}" />
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===== CLEAN PROFESSIONAL CSS ===== -->
+        <style>
+
+            body {
+                background: #f4f6f9;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+
+            .dashboard-container {
+                padding: 25px;
+            }
+
+            .dashboard-title {
+                font-size: 26px;
+                font-weight: 700;
+                margin-bottom: 22px;
+                color: #2c2c2c;
+            }
+
+            /* ===== CARD GRID ===== */
+            .cards-row {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 20px;
+            }
+
+            /* ===== CARD ===== */
+            .card {
+                background: #ffffff;
+                border-radius: 14px;
+                padding: 22px;
+                height: 130px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                transition: all 0.25s ease;
+                border-left: 6px solid #4e73df;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+            }
+
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .card-title {
+                font-size: 15px;
+                color: #666;
+                font-weight: 600;
+            }
+
+            .card-icon {
+                font-size: 30px;
+                color: #4e73df;
+            }
+
+            .card-value {
+                font-size: 34px;
+                font-weight: 700;
+                color: #1f3bb3;
+                line-height: 1;
+            }
+
+        </style>
+
+    </ui:define>
+
+</ui:composition>

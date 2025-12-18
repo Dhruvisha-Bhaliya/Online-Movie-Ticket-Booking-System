@@ -74,9 +74,9 @@ public class Seat implements Serializable {
     @Size(max = 7)
     @Column(name = "status")
     private String status;
-    @ManyToMany(mappedBy = "seatCollection")
+//    @ManyToMany(mappedBy = "seatCollection")
     @JsonbTransient
-    private Collection<Booking> bookingCollection;
+//    private Collection<Booking> bookingCollection;
     @JoinColumn(name = "screen_id", referencedColumnName = "screen_id")
     @ManyToOne(optional = false)
     private Screen screenId;
@@ -156,13 +156,13 @@ public class Seat implements Serializable {
         this.status = status;
     }
 
-    public Collection<Booking> getBookingCollection() {
-        return bookingCollection;
-    }
-
-    public void setBookingCollection(Collection<Booking> bookingCollection) {
-        this.bookingCollection = bookingCollection;
-    }
+//    public Collection<Booking> getBookingCollection() {
+//        return bookingCollection;
+//    }
+//  
+//    public void setBookingCollection(Collection<Booking> bookingCollection) {
+//        this.bookingCollection = bookingCollection;
+//    }
 
     public Screen getScreenId() {
         return screenId;

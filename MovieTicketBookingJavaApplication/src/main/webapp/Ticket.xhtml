@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <title>Your E-Ticket</title>
+    <style>
+        /* Base Styling */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        
+        /* Ticket Container */
+        .ticket-card { width: 350px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden; position: relative; }
+        .ticket-header { background-color: #f84464; /* Theme Color */ color: white; padding: 20px; text-align: center; }
+        .ticket-header h2 { margin: 0; font-size: 1.5em; font-weight: 500;}
+        
+        /* Movie Details */
+        .movie-info { padding: 20px; text-align: center; }
+        .movie-info h3 { margin-top: 0; margin-bottom: 10px; color: #333; font-size: 1.8em; }
+        .movie-info p { color: #666; font-size: 0.9em; margin: 5px 0; }
+        
+        /* Grid Details (Date, Time, Seats) */
+        .details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; border-top: 1px solid #eee; }
+        .grid-item { text-align: center; }
+        .grid-item .label { font-size: 0.75em; color: #999; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .grid-item .value { font-size: 1.1em; font-weight: bold; color: #333; }
+        
+        /* Barcode Area */
+        .barcode-area { padding: 20px 20px 30px; border-top: 5px dashed #ccc; text-align: center; }
+        .barcode-area .transaction-id { font-size: 0.8em; color: #666; margin-top: 10px; }
+        
+        /* Action Link */
+        .action-link { display: block; text-align: center; margin-top: 20px; color: #f84464; font-weight: bold; text-decoration: none; padding-bottom: 20px;}
+        .action-link:hover { text-decoration: underline; }
+
+        /* Punch Hole Effect (Decorative, for the tear line) */
+        .ticket-card::before {
+            content: '';
+            position: absolute;
+            top: 170px; /* Adjust based on your header height */
+            left: -10px;
+            right: -10px;
+            height: 20px;
+            background: radial-gradient(circle, #f4f4f4 5px, transparent 6px) repeat-x;
+            background-size: 12px 10px;
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <f:metadata>
+        </f:metadata>
+    
+    <div class="ticket-card">
+        
+        <div class="ticket-header">
+            <h2>🎉 Your Confirmed E-Ticket</h2>
+            <p>MyShowz Entertainment</p>
+        </div>
+        
+        <div class="movie-info">
+            <h3>#{ticketViewController.booking.showId.movieId}</h3> 
+            <p>@ #{ticketViewController.booking.showId.screenId}</p> 
+        </div>
+
+        <div class="details-grid">
+            
+            <div class="grid-item">
+                <span class="label">Date</span>
+                <span class="value"><h:outputText value="#{ticketViewController.booking.showId.showTime}">
+                    <f:convertDateTime pattern="MMM dd, yyyy" />
+                </h:outputText></span>
+            </div>
+            
+            <div class="grid-item">
+                <span class="label">Time</span>
+                <span class="value"><h:outputText value="#{ticketViewController.booking.showId.time}">
+                    <f:convertDateTime pattern="HH:mm" />
+                </h:outputText></span>
+            </div>
+            
+            <div class="grid-item">
+                <span class="label">Total Price</span>
+                <span class="value">₹ #{ticketViewController.booking.totalAmount}</span>
+            </div>
+            
+            <div class="grid-item">
+                <span class="label">Screen</span>
+                <span class="value">#{ticketViewController.booking.showId.screenNo}</span>
+            </div>
+            
+            <div class="grid-item">
+                <span class="label">Seats (Row/No.)</span>
+                <span class="value">#{ticketViewController.booking.seatsSelected}</span> 
+            </div>
+            
+            <div class="grid-item">
+                <span class="label">Booking ID</span>
+                <span class="value">#{ticketViewController.booking.bookingId}</span>
+            </div>
+            
+        </div>
+        
+        <div class="barcode-area">
+            <img src="resources/images/barcode_placeholder.png" alt="Barcode" style="width: 80%; height: 60px;" />
+            <div class="transaction-id">Transaction ID: #{ticketViewController.booking.paymentId.transactionId}</div>
+        </div>
+        
+        <h:link outcome="index.xhtml" value="Return to Home Page" styleClass="action-link"/>
+
+    </div>
+
+</h:body>
+</html>

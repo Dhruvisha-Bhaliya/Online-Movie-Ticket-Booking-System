@@ -372,10 +372,11 @@
                 </p>
 
                 <h:form>
-                    <h:commandButton value="Proceed to Pay"
-                                     onclick="showTermsModal(); return false;"
-                                     action="#{movieBookingController.completeBooking()}"
+                    <h:commandButton value="Continue"
+                                     onclick="showTermsModal();"
+                                     
                                      styleClass="pay-btn"
+                                     type="button"
                                      disabled="#{movieBookingController.selectedSeats.size() 
                                                  != movieBookingController.numberOfSeats}"/>
                 </h:form>

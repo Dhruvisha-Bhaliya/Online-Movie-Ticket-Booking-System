@@ -47,6 +47,126 @@ public class AllAdminLogin implements AllAdminLoginLocal {
     }
 
     @Override
+    public List<RoleMaster> getAllowedRoles(Long loggedRoleId) {
+
+        if (loggedRoleId == 1) { // SUPER_ADMIN
+            return em.createQuery(
+                    "SELECT r FROM RoleMaster r WHERE r.roleId > 1",
+                    RoleMaster.class).getResultList();
+        }
+
+        if (loggedRoleId == 2) { // ADMIN
+            return em.createQuery(
+                    "SELECT r FROM RoleMaster r WHERE r.roleId IN (3,4)",
+                    RoleMaster.class).getResultList();
+        }
+
+        if (loggedRoleId == 3) { // MANAGER
+            return em.createQuery(
+                    "SELECT r FROM RoleMaster r WHERE r.roleId = 4",
+                    RoleMaster.class).getResultList();
+        }
+
+        return List.of();
+    }
+
+    @Override
+    public List<Admin> getAdminsByRole(Long loggedRoleId) {
+
+        if (loggedRoleId == 1) {
+            return em.createQuery("SELECT a FROM Admin a", Admin.class)
+                    .getResultList();
+        }
+
+        if (loggedRoleId == 2) {
+            return em.createQuery(
+                    "SELECT a FROM Admin a WHERE a.role.roleId IN (3,4)",
+                    Admin.class).getResultList();
+        }
+
+        if (loggedRoleId == 3) {
+            return em.createQuery(
+                    "SELECT a FROM Admin a WHERE a.role.roleId = 4",
+                    Admin.class).getResultList();
+        }
+
+        return List.of();
+    }
+
+    @Override
+    public boolean createAdmin(Admin creator, String name, String email,
+            String password, Long phone, Long roleId) {
+
+        if (!isAllowed(creator.getRole().getRoleId(), roleId)) {
+            return false;
+        }
+
+        if (!isValidEmailForRole(email, roleId)) {
+            return false;
+        }
+
+        RoleMaster role = em.find(RoleMaster.class, roleId);
+
+        Admin a = new Admin();
+        a.setUsername(name);
+        a.setEmail(email);
+        a.setPassword(PasswordUtil.hashPassword(password));
+        a.setPhoneno(BigInteger.valueOf(phone));
+        a.setRole(role);
+        a.setStatus("active");
+        a.setCreatedAt(new Date());
+        a.setUpdatedAt(new Date());
+
+        em.persist(a);
+        return true;
+    }
+
+    private boolean isValidEmailForRole(String email, Long roleId) {
+
+        email = email.toLowerCase();
+
+        switch (roleId.intValue()) {
+            case 1: // SUPER_ADMIN
+                return email.endsWith("@cinemaxhub.com")
+                        && email.contains("sadmin");
+
+            case 2: // ADMIN
+                return email.endsWith("@cinemaxhub.com")
+                        && email.contains("admin");
+
+            case 3: // MANAGER
+                return email.endsWith("@cinemaxhub.com")
+                        && email.contains("manager");
+
+            case 4: // STAFF
+                return email.endsWith("@cinemaxhub.com")
+                        && email.contains("staff");
+
+            default:
+                return false;
+        }
+    }
+
+    private boolean isAllowed(Long creatorRole, Long targetRole) {
+
+        if (targetRole == null) {
+            return false;
+        }
+
+        if (creatorRole == 1) {
+            return targetRole > 1;
+        }
+        if (creatorRole == 2) {
+            return targetRole == 3 || targetRole == 4;
+        }
+        if (creatorRole == 3) {
+            return targetRole == 4;
+        }
+
+        return false;
+    }
+
+    @Override
     public List<RoleMaster> getAllRoles() {
         return em.createNamedQuery("RoleMaster.findAll").getResultList();
     }
@@ -56,31 +176,59 @@ public class AllAdminLogin implements AllAdminLoginLocal {
         return em.createNamedQuery("Admin.findAll").getResultList();
     }
 
+//    @Override
+//    public void createAdmin(String name, String email, String password, Long phone, Long roleId) {
+//        RoleMaster role = em.find(RoleMaster.class, roleId);
+//
+//        Admin a = new Admin();
+//        a.setUsername(name);
+//        a.setEmail(email);
+//        a.setPassword(new PasswordUtil().hashPassword(password));
+//        a.setPhoneno(BigInteger.valueOf(phone));
+//        a.setRole(role);
+//        a.setStatus("active");
+//        a.setCreatedAt(new Date());
+//        a.setUpdatedAt(new Date());
+//
+//        em.persist(a);
+//    }
+    
     @Override
-    public void createAdmin(String name, String email, String password, Long phone, Long roleId) {
+    public void updateRoleDescription(Long roleId, String description) {
+
         RoleMaster role = em.find(RoleMaster.class, roleId);
 
-        Admin a = new Admin();
-        a.setUsername(name);
-        a.setEmail(email);
-        a.setPassword(new PasswordUtil().hashPassword(password));
-        a.setPhoneno(BigInteger.valueOf(phone));
-        a.setRole(role);
-        a.setStatus("active");
-        a.setCreatedAt(new Date());
-        a.setUpdatedAt(new Date());
-
-        em.persist(a);
+        if (role != null) {
+            role.setDescription(description);
+            em.merge(role);
+        }
     }
 
     @Override
     public void deleteAdmin(Long id) {
         Admin a = em.find(Admin.class, id);
-        em.remove(a);
+        if (a != null) {
+            em.remove(a);
+        }
     }
 
-//    @Override
-//    public void updateAdmin(Admin admin) {
-//        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-//    }
+    @Override
+    public Admin findAdminByEmail(String email) {
+        try {
+            return em.createQuery(
+                    "SELECT a FROM Admin a WHERE a.email = :email",
+                    Admin.class
+            )
+                    .setParameter("email", email)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void updateAdmin(Admin admin) {
+        admin.setUpdatedAt(new Date());
+        em.merge(admin);
+    }
 }

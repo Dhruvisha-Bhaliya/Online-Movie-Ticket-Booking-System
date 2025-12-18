@@ -60,3 +60,40 @@ function confirmLogout(event) {
         }
     });
 }
+
+function checkStrength(password) {
+    const bar = document.getElementById("strength-bar");
+    const text = document.getElementById("strength-text");
+
+    let strength = 0;
+
+    if (password.length >= 6)
+        strength++;        // length rule
+    if (/[A-Z]/.test(password))
+        strength++;      // uppercase
+    if (/[a-z]/.test(password))
+        strength++;      // lowercase
+    if (/[0-9]/.test(password))
+        strength++;      // numbers
+    if (/[@$!%*?&#]/.test(password))
+        strength++; // special char
+
+    if (strength <= 1) {
+        bar.style.width = "33%";
+        bar.style.background = "red";
+        text.innerHTML = "Weak";
+        text.style.color = "red";
+
+    } else if (strength <= 3) {
+        bar.style.width = "66%";
+        bar.style.background = "orange";
+        text.innerHTML = "Medium";
+        text.style.color = "orange";
+
+    } else {
+        bar.style.width = "100%";
+        bar.style.background = "green";
+        text.innerHTML = "Strong";
+        text.style.color = "green";
+    }
+}
