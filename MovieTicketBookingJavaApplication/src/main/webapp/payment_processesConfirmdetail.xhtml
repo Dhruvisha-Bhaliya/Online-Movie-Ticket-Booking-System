@@ -4,14 +4,16 @@
       xmlns:h="jakarta.faces.html"
       xmlns:ui="jakarta.faces.facelets"
       xmlns:f="jakarta.faces.core">
-
+    <f:metadata>
+        <f:viewParam name="bookingId" value="#{movieBookingController.bookingId}" />
+    </f:metadata>
     <h:head>
         <title>Confirm Booking &amp; Pay</title>
 
         <style>
             body {
                 font-family: "Roboto", Arial, sans-serif;
-                background-color: #f7f7f7; 
+                background-color: #f7f7f7;
                 margin: 0;
                 padding: 0;
                 display: flex;
@@ -20,7 +22,7 @@
 
             .main-content {
                 width: 100%;
-                max-width: 900px; 
+                max-width: 900px;
                 background-color: #ffffff;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
                 min-height: 100vh;
@@ -163,7 +165,8 @@
                 display: block;
             }
 
-            #mainForm{
+            /* REMOVED ID MAINFORM FROM THE FORM STYLE TO PREVENT CSS BREAKAGE */
+            .main-form-style{
                 width: 100%;
                 display: flex;
                 justify-content: center;
@@ -172,12 +175,13 @@
     </h:head>
 
     <h:body>
-        <h:form id="mainForm">
+        
+        <h:form id="bookingForm" styleClass="main-form-style">
             <div class="main-content">
 
                 <div class="top-header">
                     <h:commandLink action="SeatSelection.xhtml" styleClass="back-icon" immediate="true">
-                        &#x2190; </h:commandLink><h2>Confirm Booking</h2>
+                    </h:commandLink><h2>Confirm Booking</h2>
                 </div>
 
                 <div class="summary-card movie-details">
@@ -202,84 +206,108 @@
                     </p>
                 </div>
 
-                <h:form id="paymentSummaryForm">
-                    <div class="summary-card order-details">
-                        <h3>Order Summary</h3>
+                <div class="summary-card order-details">
+                    <h3>Order Summary</h3>
 
-                        <div class="price-row">
-                            <span>Ticket Price (<h:outputText value="#{movieBookingController.bookedSeatCount}"/> Ticket(s))</span>
-                            <span>₹<h:outputText value="#{movieBookingController.subTotalAmountWithoutFees}"/></span>
-                        </div>
-
-                        <div class="price-row">
-                            <span>Convenience Fees</span>
-                            <span>₹<h:outputText value="#{movieBookingController.convenienceFees}"/></span>
-                        </div>
-                        <div class="convenience-fees-details">
-                            (Includes GST and Service Charge)
-                        </div>
-
-                        <div class="price-row" style="color: #f84464;">
-                            <span>
-                                ❤ Donate to BookChange (<h:outputText value="#{movieBookingController.selectedSeats.size()}"/> per ticket)
-                            </span>
-                            <span>+ ₹<h:outputText value="#{movieBookingController.donationAmount}"/></span>
-                        </div>
-
-                        <div class="total-row">
-                            <span>Total Amount</span>
-                            <span>₹<h:outputText value="#{movieBookingController.totalAmountWithFees}"/></span>
-                        </div>
+                    <div class="price-row">
+                        <span>Ticket Price (<h:outputText value="#{movieBookingController.bookedSeatCount}"/> Ticket(s))</span>
+                        <span>₹<h:outputText value="#{movieBookingController.subTotalAmountWithoutFees}"/></span>
                     </div>
 
-                    <div class="summary-card user-details">
-                        <h3>Your Details (for sending booking details)</h3>
-                        <div class="user-row">
-                            <p>Email: <strong><h:outputText id="emailText" value="#{empty movieBookingController.currentUser ? '' : movieBookingController.currentUser.email}"/></strong></p>
-                            <span class="edit-btn" onclick="editField('email')">Edit</span>
-                        </div>
-                        <div class="user-row">
-                            <p>Phone: <strong><h:outputText id="phonenoText" value="#{movieBookingController.currentUser.phoneno}"/></strong></p>
-                            <span class="edit-btn" onclick="editField('phoneno')">Edit</span>
-                        </div>
+                    <div class="price-row">
+                        <span>Convenience Fees</span>
+                        <span>₹<h:outputText value="#{movieBookingController.convenienceFees}"/></span>
+                    </div>
+                    <div class="convenience-fees-details">
+                        (Includes GST and Service Charge)
                     </div>
 
-                    <h:form id="updateUserForm">
-                        <h:commandButton id="updateBtn" action="#{movieBookingController.updateUser}" style="display:none">
-                            <f:param name="field" id="fieldParam" value="" />
-                            <f:param name="newValue" id="valueParam" value="" />
-                        </h:commandButton>
-                    </h:form>
-
-
-
-                    <div class="offers-section">
-                        <span>🎁 Apply Offers</span>
-                        <span>&gt;</span>
+                    <div class="price-row" style="color: #f84464;">
+                        <span>
+                            ❤ Donate to BookChange (<h:outputText value="#{movieBookingController.bookedSeatCount}"/> per ticket)
+                        </span>
+                        <span>+ ₹<h:outputText value="#{movieBookingController.donationAmount}"/></span>
                     </div>
 
-                    <div class="sticky-footer">
-                        <h:commandButton value="Proceed to Pay"
-                                         action="movie_paymentmethods.xhtml" styleClass="pay-btn"/>
+                    <div class="total-row">
+                        <span>Total Amount</span>
+                        <span>₹<h:outputText value="#{movieBookingController.totalAmountWithFees}"/></span>
                     </div>
-                </h:form>
+                </div>
 
+                <div class="summary-card user-details">
+                    <h3>Your Details (for sending booking details)</h3>
+                    <div class="user-row">
+                        <p>Email: <strong><h:outputText id="emailText" value="#{empty movieBookingController.currentUser.email ? 'N/A' : movieBookingController.currentUser.email}"/></strong></p>
+                        <span class="edit-btn" onclick="openEditModal('email', '#{movieBookingController.currentUser.email}')">Edit</span>
+                    </div>
+                    <div class="user-row">
+                        <p>Phone: <strong><h:outputText id="phonenoText" value="#{movieBookingController.currentUser.phoneno}"/></strong></p>
+                        <span class="edit-btn" onclick="openEditModal('phoneno', '#{movieBookingController.currentUser.phoneno}')">Edit</span>
+                    </div>
+                </div>
+
+                <div class="offers-section">
+                    <span>🎁 Apply Offers</span>
+                    <span>&gt;</span>
+                </div>
+
+                <div class="sticky-footer">
+                    <h:commandButton value="Proceed to Pay"
+                                     action="#{cashfreePaymentController.startPayment(movieBookingController.currentBooking.bookingId)}" styleClass="pay-btn"/>
+                </div>
             </div>
         </h:form>
 
-        <!--        <script type="text/javascript">
-                    function editField(field) {
-                        let currentValue = document.getElementById(field + 'Text').innerText;
-                        let newValue = prompt("Enter new " + field + ":", currentValue);
-                        if (newValue !== null && newValue.trim() !== "") {
-                            // Set hidden form params
-                            document.getElementById('updateUserForm:fieldParam').value = field;
-                            document.getElementById('updateUserForm:valueParam').value = newValue;
-                            // Submit the form
-                            document.getElementById('updateUserForm:updateBtn').click();
-                        }
-                    }
-                </script>-->
+        <h:form id="editForm">
+            <div id="editModal" 
+                 style="display:none; position: fixed; top: 0; left: 0; width: 100%;
+                 height: 100%; background: rgba(0,0,0,0.6);
+                 justify-content: center; align-items: center;">
+
+                <div style="background: #fff; padding: 20px; border-radius: 10px; width: 350px;">
+                    <h3 id="modalTitle">Edit Field</h3>
+                    
+                    <h:inputText id="newValueInput" value="#{movieBookingController.newValue}" 
+                                 style="width: 100%; padding: 8px;" />
+
+                    <h:inputHidden id="fieldName" value="#{movieBookingController.fieldName}" />
+
+                    <br/><br/>
+                    <h:commandButton value="Save Changes" action="#{movieBookingController.updateUserField}" 
+                                     style="width:100%; background:#f84464; padding:10px; color:white; border:none; border-radius:5px;" 
+                                     onclick="closeModal();" >
+                        <f:ajax execute="@form" render=":bookingForm:emailText :bookingForm:phonenoText"/>
+                    </h:commandButton>
+                    
+
+                    <button type="button" onclick="closeModal()" 
+                            style="margin-top:10px; width:100%; padding:10px; background:#888; color:white; border:none; border-radius:5px;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </h:form>
+
+        <script>
+            function openEditModal(field, value) {
+                // Set the modal title
+                document.getElementById("modalTitle").innerText = "Edit " + field.charAt(0).toUpperCase() + field.slice(1);
+                
+                // Set the value in the h:inputText (must use the form ID prefix)
+                document.getElementById("editForm:newValueInput").value = value.trim(); 
+                
+                // Set the hidden fieldName value for the backing bean
+                document.getElementById("editForm:fieldName").value = field; 
+
+                // Show the modal
+                document.getElementById("editModal").style.display = "flex";
+            }
+
+            function closeModal() {
+                document.getElementById("editModal").style.display = "none";
+            }
+        </script>
 
     </h:body>
 </html>

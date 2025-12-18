@@ -4,8 +4,8 @@
  */
 package userController;
 
+import cdi.UserAuthBean;
 import entity.BookedSeat;
-import entity.BookedSeatPK;
 import entity.Booking;
 import entity.Movie;
 import entity.Screen;
@@ -15,7 +15,6 @@ import entity.Showmovie;
 import entity.User;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
-import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
@@ -38,17 +37,21 @@ import user_bean.UserBeanLocal;
 import user_bean.seatCategoryBeanLocal;
 import jakarta.faces.event.AbortProcessingException;
 import jakarta.faces.event.ComponentSystemEvent;
-import java.util.Collection;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Inject;
+import java.math.BigInteger;
 import user_bean.BookingBeanLocal;
+import user_bean.PaymentBeanLocal;
 
 /**
  *
  * @author DELL
  */
 @Named("movieBookingController")
-@SessionScoped
+@ViewScoped
 public class BookingController implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     @EJB
     private MovieBeanLocal movieBean;
     @EJB
@@ -60,13 +63,22 @@ public class BookingController implements Serializable {
     @EJB
     private BookingHelperBeanLocal helperBean;
     @EJB
-    private UserBeanLocal userBean; 
+    private UserBeanLocal userBean;
 
     @EJB
     private SeatBeanLocal seatBean;
 
     @EJB
     private BookingBeanLocal bookingBean;
+
+    @Inject
+    private UserAuthBean userAuthBean;
+
+    @Inject
+    private CashFreePaymentPage cashFreePayment;
+    
+    @EJB
+    private PaymentBeanLocal paymentBean;
 
     // --- State Variables (Data) ---
     private Long currentMovieId;
@@ -80,7 +92,7 @@ public class BookingController implements Serializable {
     private List<Long> bookedSeatIds;
     private List<Seat> selectedSeats;
     private long totalAmount = 0;
-    private Long currentUserId = 1L;
+    private Long currentUserId;
 
     private List<Date> availableDates;
     private Date selectedDate;
@@ -95,126 +107,128 @@ public class BookingController implements Serializable {
 
     private User currentUser;
     private Booking currentBooking;
+    private String movieIdParam;
+
+    private String fieldName;
+    private String newValue;
+
+    private Long bookingId;
+    private double totalAmountWithFees;
+    private Booking booking;
 
     @PostConstruct
     public void init() {
-        Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+
+        FacesContext fc = FacesContext.getCurrentInstance();
+
+        currentUser = userAuthBean.getLoggedUser();
+        if (currentUser == null) {
+            System.err.println("No logged in user found via userAuthBean! Booking may fail unless user logs in.");
+        } else {
+            currentUserId = currentUser.getUserId();
+        }
+
+        Map<String, String> params = FacesContext.getCurrentInstance()
+                .getExternalContext().getRequestParameterMap();
         String bookingParam = params.get("bookingId");
-        String movieIdParam = params.get("movieId");
         String showIdParam = params.get("showId");
         String numSeatsParam = params.get("numSeats");
+        movieIdParam = params.get("movieId");
 
         if (bookingParam != null) {
             try {
-                Long bookingId = Long.parseLong(bookingParam);
-                this.currentBooking = bookingBean.findBooking(bookingId);
+                long bookingId = Long.parseLong(bookingParam);
+                currentBooking = bookingBean.findBooking(bookingId);
 
-                if (this.currentBooking != null) {
-                    
-                    this.selectedShow = this.currentBooking.getShowId();
-                    this.selectedMovie = this.selectedShow != null ? this.selectedShow.getMovieId() : null;
-                    this.totalAmount = this.currentBooking.getTotalAmount(); 
-
-                    
-                    this.selectedSeats = this.currentBooking.getBookedSeatCollection().stream()
-                            .map(BookedSeat::getSeat)
+                if (currentBooking != null) {
+                    selectedShow = currentBooking.getShowId();
+                    selectedMovie = selectedShow.getMovieId();
+                    currentMovieId = selectedMovie.getMovieId();
+                    selectedSeats = currentBooking.getBookedSeatCollection()
+                            .stream().map(BookedSeat::getSeat)
                             .collect(Collectors.toList());
-                    
-                } else {
-                    System.err.println("Booking not found for ID: " + bookingId);
+                    totalAmount = currentBooking.getTotalAmount();
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid Booking ID format.");
+
+            } catch (Exception ex) {
+                System.err.println("Invalid booking param");
             }
         }
 
-        
-        if (movieIdParam != null) {
+        if (selectedMovie == null && movieIdParam != null) {
             try {
-                this.currentMovieId = Long.parseLong(movieIdParam);
-                this.selectedMovie = movieBean.findMovie(this.currentMovieId);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid Movie ID format.");
+                currentMovieId = Long.parseLong(movieIdParam);
+                selectedMovie = movieBean.findMovie(currentMovieId);
+            } catch (Exception e) {
+                selectedMovie = null;
             }
         }
 
-        
         if (showIdParam != null) {
             try {
-                this.currentShowId = Long.parseLong(showIdParam);
-                this.selectedShow = showBean.find(this.currentShowId);
+                currentShowId = Long.parseLong(showIdParam);
+                selectedShow = showBean.find(currentShowId);
 
-                try {
-                    if (numSeatsParam != null && !numSeatsParam.isEmpty()) {
-                        this.numberOfSeats = Integer.parseInt(numSeatsParam);
-                    } else {
-                        this.numberOfSeats = 1;
+                numberOfSeats = (numSeatsParam != null && !numSeatsParam.isEmpty())
+                        ? Integer.parseInt(numSeatsParam)
+                        : 1;
+
+                if (selectedShow != null) {
+
+                    if (selectedMovie == null) {
+                        selectedMovie = selectedShow.getMovieId();
                     }
-                } catch (Exception e) {
-                    this.numberOfSeats = 1;
-                }
 
-                if (this.selectedShow != null && selectedShow.getMovieId() != null) {
-                    this.currentMovieId = selectedShow.getMovieId().getMovieId();
-                }
-
-                
-                if (this.selectedShow != null && selectedShow.getScreenId() != null) {
-                    //Long screenIdToFetch = this.selectedShow.getScreenId().getScreenId();
+                    currentMovieId = selectedMovie.getMovieId();
                     Screen screen = selectedShow.getScreenId();
+                    seatsForScreen = seatBean.findSeatsByScreen(screen.getScreenId());
 
-                    if (screen.getScreenId() != null) {
+                    bookedSeatIds = helperBean.findBookedSeatIdsByShow(currentShowId);
 
-                        this.seatsForScreen = seatBean.findSeatsByScreen(screen.getScreenId());
-
-                        System.out.println("Loaded seats: " + seatsForScreen.size());
-
-                    }
-                   
-                    this.bookedSeatIds = helperBean.findBookedSeatIdsByShow(this.currentShowId);
-
-                    
                     if (currentBooking == null) {
-                        this.selectedSeats = new ArrayList<>();
-                        this.totalAmount = 0;
+                        selectedSeats = new ArrayList<>();
+                        totalAmount = 0;
                     }
-
-                    
-                    if (this.currentMovieId == null && this.selectedShow.getMovieId() != null) {
-                        this.currentMovieId = this.selectedShow.getMovieId().getMovieId();
-                        this.selectedMovie = this.selectedShow.getMovieId();
-                    }
-                } else {
-                    System.err.println("Show or Screen details missing for seat loading.");
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid Show ID or Number of Seats format.");
 
+            } catch (Exception e) {
+                System.err.println("Invalid show param");
             }
         }
 
-       
-        if (this.currentMovieId != null && showIdParam == null) {
+        if (selectedShow == null && currentMovieId != null) {
             loadMovieAndShows();
+            availableDates = showBean.findAvailableDates(currentMovieId);
+            if (selectedDate == null && availableDates != null && !availableDates.isEmpty()) {
+                selectedDate = availableDates.get(0);
+            }
+
+            if (selectedDate != null) {
+                filterByDate(selectedDate);
+            }
         }
 
-        // 4. Filter shows (only necessary for the main booking page)
-        if (this.selectedDate != null && this.currentMovieId != null && this.showsByTheater == null && showIdParam == null) {
-            filterByDate(selectedDate);
+        if (currentUserId != null) {
+            try {
+                currentUser = userBean.findUser(currentUserId);
+            } catch (Exception e) {
+                System.err.println("user reload filed");
+            }
+
+        }
+        if (selectedShow != null && selectedMovie == null) {
+            selectedMovie = selectedShow.getMovieId();
+            if (selectedMovie != null) {
+                currentMovieId = selectedMovie.getMovieId();
+                System.out.println("DEBUG: Movie auto-recovered from show.");
+            }
         }
 
-        if (this.selectedMovie == null) {
-            System.out.println("DEBUG: Movie context failed to load in init(). Page will be blank.");
+        if (selectedMovie == null) {
+            System.out.println("DEBUG: Movie context FAILED.");
         } else {
-            System.out.println("DEBUG: Movie context loaded successfully for ID: " + this.currentMovieId);
+            System.out.println("DEBUG: Movie context OK.");
         }
-
-        try {
-            currentUser = userBean.findUser(currentUserId);
-        } catch (Exception e) {
-            currentUser = null;
-        }
-
     }
 
     // 1. Load Movie and Shows for the main showtime page
@@ -271,7 +285,6 @@ public class BookingController implements Serializable {
             return new ArrayList<>();
         }
 
-       
         return showBean.findShowsByMovieDateAndLanguage(currentMovieId, selectedDate, "Hindi");
     }
 
@@ -288,7 +301,6 @@ public class BookingController implements Serializable {
                 }));
     }
 
-   
     public String selectShowtime(Long showId) {
         this.currentShowId = showId;
         this.selectedShow = showBean.find(showId);
@@ -306,7 +318,6 @@ public class BookingController implements Serializable {
         return null;
     }
 
-   
     public void toggleSeat(Seat seat) {
         if (isSeatBooked(seat.getSeatId())) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Seat Booked", "This seat is already booked."));
@@ -327,7 +338,6 @@ public class BookingController implements Serializable {
         }
         calculateTotalAmount();
 
-        
         FacesContext.getCurrentInstance().getPartialViewContext().getRenderIds().add("bookingSummary");
     }
 
@@ -344,8 +354,7 @@ public class BookingController implements Serializable {
         if (selectedSeats != null && !selectedSeats.isEmpty()) {
             long sum = 0;
             for (Seat seat : selectedSeats) {
-                // CRITICAL: Assuming your Seat entity has a relation to SeatCategory
-                // and SeatCategory has a BigInteger price field.
+
                 if (seat.getCategoryId() != null && seat.getCategoryId().getPrice() != null) {
                     sum += seat.getCategoryId().getPrice().longValue();
                 }
@@ -362,53 +371,50 @@ public class BookingController implements Serializable {
             return null;
         }
 
+        User loggedUser = userAuthBean.getLoggedUser();
+        if (loggedUser == null) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Login Required", "Please login to continue booking."));
+            return null;
+        }
+
         try {
-            // Step 1: Create base booking
-            Booking newBooking = new Booking();
-            newBooking.setBookingTime(new Date());
-            newBooking.setBookingStatus("Confirmed");
-
-            newBooking.setTotalAmount(totalAmount);
-            User user = userBean.findUser(currentUserId);
-            newBooking.setUserId(user);
-            newBooking.setShowId(selectedShow);
-            newBooking.setCreatedAt(new Date());
-            newBooking.setUpdatedAt(new Date());
-
-            bookingBean.createBooking(newBooking);
-            Long bookingId = newBooking.getBookingId();
-            if (bookingId == null) {
-                throw new RuntimeException("Booking ID is null after persist!");
+            Date now = new Date();
+            
+            User managedUser = userBean.findUser(loggedUser.getUserId());
+            Showmovie managedShow = showBean.find(selectedShow.getShowId());
+            
+            Booking booking = new Booking();
+            booking.setBookingTime(now);
+            booking.setCreatedAt(now);
+            booking.setUpdatedAt(now);
+            booking.setBookingStatus("PENDING_PAYMENT"); // IMPORTANT
+            booking.setTotalAmount(totalAmount);
+            booking.setUserId(managedUser);
+            booking.setShowId(managedShow);
+            booking.setStatus("active");
+            
+             List<Seat> seatsToBook = new ArrayList<>(selectedSeats);
+            helperBean.createBookingWithSeats(booking, seatsToBook);
+            Long bookingId = booking.getBookingId();
+            
+            if(bookingId == null){
+                throw new RuntimeException("Booking ID was not generated by EJB persistence");
             }
-
-            Collection<BookedSeat> bookedSeatList = new ArrayList<>();
-
-            for (Seat seat : selectedSeats) {
-
-                BookedSeatPK pk = new BookedSeatPK(bookingId, seat.getSeatId());
-
-                BookedSeat bs = new BookedSeat();
-                bs.setBookedSeatPK(pk);
-                bs.setBooking(newBooking);
-                bs.setSeat(seat);
-
-                bookedSeatList.add(bs);
-            }
-
-           
-            newBooking.setBookedSeatCollection(bookedSeatList);
-            bookingBean.editBooking(newBooking);
-
+            
+            System.out.println("DEBUG: bookingID : "+bookingId);
             return "payment_processesConfirmdetail.xhtml?faces-redirect=true&bookingId=" + bookingId;
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_FATAL,
-                            "Booking Failed", ex.getMessage()));
+                            "Booking Failed", "Please try again"));
             return null;
         }
     }
+
 
     /*  public void cancelBookingIfWithin2Hours(Booking booking) {
         Date now = new Date();
@@ -430,13 +436,12 @@ public class BookingController implements Serializable {
 
         List<Long> allPrices = new ArrayList<>();
 
-        
         Set<Screen> uniqueScreens = shows.stream()
                 .map(Showmovie::getScreenId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         for (Screen screen : uniqueScreens) {
- 
+
             List<SeatCategory> categories = seatCategoryBean.findByScreenId(screen.getScreenId());
             categories.stream()
                     .filter(cat -> cat.getPrice() != null)
@@ -549,41 +554,16 @@ public class BookingController implements Serializable {
     private Long selectedShowIdForBooking;
     private int numberOfSeats = 1;
 
-    /*public String proceedToSeatLayout() {
-        // 1. Get the selected Show object using the selectedShowIdForBooking
-        selectedShow = showBean.find(selectedShowIdForBooking);
-
-        if (selectedShow != null) {
-            // 2. Fetch all seats for the screen associated with this show
-            // Note: Assuming a Show object has a relation to a Screen object.
-            Screen screen = selectedShow.getScreenId(); // Assuming getScreenId() returns the Screen object
-            if (screen != null) {
-                // Fetch all seats (Available and Booked) for this screen
-                seatsForScreen = seatBean.findSeatsByScreen(screen);
-            }
-
-            // 3. Initialize selectedSeats list
-            selectedSeats = new ArrayList<>();
-
-            // 4. Return the navigation outcome to seats.xhtml
-            return "SeatSelection.xhtml?faces-redirect=true";
-        }
-
-        // Handle error or return to current page
-        return "booking.xhtml";
-    }*/
-    // In userController.BookingController.java
     public String proceedToSeatLayout() {
-        
+
         selectedShow = showBean.find(selectedShowIdForBooking);
 
-        
         if (this.selectedMovie == null && this.currentMovieId != null) {
             this.selectedMovie = movieBean.findMovie(currentMovieId);
         }
 
         if (selectedShow != null && selectedMovie != null) {
-        
+
             Screen screen = selectedShow.getScreenId();
             if (screen != null) {
                 Long screenIdToFetch = screen.getScreenId();
@@ -594,6 +574,7 @@ public class BookingController implements Serializable {
 
             this.selectedSeats = new ArrayList<>();
             this.totalAmount = 0;
+            this.currentShowId = selectedShowIdForBooking;
 
             return "SeatSelection.xhtml?faces-redirect=true&showId=" + selectedShowIdForBooking + "&movieId=" + currentMovieId + "&numSeats=" + numberOfSeats;
         }
@@ -661,16 +642,13 @@ public class BookingController implements Serializable {
 
         Map<Character, List<Seat>> seatsMap = getSeatsGroupedByRow();
 
- 
         return seatsMap.entrySet().stream()
-            
                 .sorted(Map.Entry.comparingByKey())
-                
                 .collect(Collectors.toList());
     }
 
     public String updateSeatSelection() {
-        
+
         calculateTotalAmount();
         FacesContext.getCurrentInstance().getPartialViewContext().getRenderIds().add("bookingSummary");
         return null;
@@ -726,9 +704,9 @@ public class BookingController implements Serializable {
         SeatCategory currentCategory = currentSeats.get(0).getCategoryId();
         if (lastRenderedCategory == null || !lastRenderedCategory.equals(currentCategory)) {
             lastRenderedCategory = currentCategory;
-            return true; 
+            return true;
         }
-        return false; 
+        return false;
 
     }
 
@@ -736,7 +714,7 @@ public class BookingController implements Serializable {
         if (categoryName == null || categoryName.trim().isEmpty()) {
             return "default";
         }
-      
+
         return categoryName.toLowerCase().replaceAll("\\s+", "-").replaceAll("[^a-z0-9\\-]+", "");
     }
 
@@ -808,7 +786,7 @@ public class BookingController implements Serializable {
     }
 
     public long getTotalAmountWithFees() {
-        long subTotal = getSubTotalAmountWithoutFees(); 
+        long subTotal = getSubTotalAmountWithoutFees();
         return subTotal
                 + getConvenienceFees()
                 + getDonationAmount();
@@ -861,13 +839,13 @@ public class BookingController implements Serializable {
                 }
             }
 
-            userBean.updateUser(currentUser); 
+            userBean.updateUser(currentUser);
 
             fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
                     "Updated!", field + " updated successfully."));
         }
     }
-    
+
     /*private String editField;
     private String editValue;
 
@@ -887,6 +865,88 @@ public class BookingController implements Serializable {
         this.editValue = editValue;
     }
     
-    */
+     */
+    public String getMovieIdParam() {
+        return movieIdParam;
+    }
+
+    public void setMovieIdParam(String movieIdParam) {
+        this.movieIdParam = movieIdParam;
+    }
+
+    public String updateUserField() {
+
+        if (currentUser == null) {
+            return null;
+        }
+
+        try {
+            if ("email".equals(fieldName)) {
+                currentUser.setEmail(newValue);
+            } else if ("phoneno".equals(fieldName)) {
+                String sanitized = newValue.replaceAll("[^0-9]", "");
+                currentUser.setPhoneno(new BigInteger(sanitized));
+            }
+
+            userBean.updateUser(currentUser);
+
+            User refreshedUser = userBean.findUser(currentUser.getUserId());
+
+            this.currentUser = refreshedUser;
+
+            FacesContext.getCurrentInstance()
+                    .getExternalContext()
+                    .getSessionMap()
+                    .put("loggedInUser", refreshedUser);
+
+            FacesContext.getCurrentInstance().addMessage(
+                    null, new FacesMessage("Updated successfully")
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(
+                    null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Update failed", "Please try again")
+            );
+        }
+
+        return null;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public String getNewValue() {
+        return newValue;
+    }
+
+    public void setNewValue(String newValue) {
+        this.newValue = newValue;
+    }
+
+    public Long getBookingId() {
+        return bookingId;
+    }
+
+    public void setBookingId(Long bookingId) {
+        this.bookingId = bookingId;
+    }
+
+//    public String proceedToPayment() {
+//
+//        String orderId = "ORD_" + System.currentTimeMillis();
+//        double amount = (double) getTotalAmountWithFees();
+//        if (amount <= 0.0) {
+//            FacesContext.getCurrentInstance().addMessage(null,
+//                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Total amount is zero. Cannot proceed to pay."));
+//            return null; // Stop the process
+//        }
+//        return cashFreePayment.preparePayment(orderId, amount);
+//    }
 
 }

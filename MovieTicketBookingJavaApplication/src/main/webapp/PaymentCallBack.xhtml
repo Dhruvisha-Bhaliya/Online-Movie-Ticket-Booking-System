@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+    
+    <f:metadata>
+        <f:viewParam name="order_id" value="#{paymentCallBackController.orderId}" />
+        <f:viewParam name="order_status" value="#{paymentCallBackController.cfOrderStatus}" />
+        <f:event type="preRenderView" listener="#{paymentCallBackController.verifyPayment}" />
+    </f:metadata>
+
+    <h:head>
+        <title>Payment Verification</title>
+<meta http-equiv="refresh" content="10" />
+
+        </h:head>
+    
+    <h:body>
+        
+        <div class="main-content">
+            <ui:fragment rendered="#{paymentCallBackController.finalVerificationStatus eq 'SUCCESS'}">
+                <div class="success-container">
+                    <div class="success-icon">&#x2714;</div>
+                    <h2>Booking Confirmed!</h2>
+                    <p>Order ID: #{paymentCallBackController.orderId}</p>
+                    <h:link outcome="ViewTickets.xhtml" value="View Your E-Ticket" style="color: #f84464; font-weight: bold;"/>
+                </div>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{paymentCallBackController.finalVerificationStatus eq 'FAILURE'}">
+                <div class="failure-container">
+                    <div class="failure-icon">&#x2716;</div>
+                    <h2>Payment Failed or Cancelled</h2>
+                    <p>We could not confirm your payment. Please try again or contact support.</p>
+                    <p>Order ID: #{paymentCallBackController.orderId}</p>
+                    <h:link outcome="homepage.xhtml" value="Return to Home" style="color: #666;"/>
+                </div>
+            </ui:fragment>
+            
+            <ui:fragment rendered="#{paymentCallBackController.finalVerificationStatus eq 'PENDING'}">
+                <div class="verification-box">
+                    <div class="loader"></div>
+                    <h2>Processing Payment Verification...</h2>
+                    <p>Your payment status is being securely verified. Please wait.</p>
+                </div>
+            </ui:fragment>
+            
+        </div>
+        
+    </h:body>
+</html>

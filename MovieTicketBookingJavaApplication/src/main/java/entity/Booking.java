@@ -82,11 +82,11 @@ public class Booking implements Serializable {
     @Size(max = 7)
     @Column(name = "status")
     private String status;
-    @JoinTable(name = "booked_seat", joinColumns = {
-        @JoinColumn(name = "bookingid", referencedColumnName = "booking_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "bookingseat_id", referencedColumnName = "seat_id")})
-    @ManyToMany
-    private Collection<Seat> seatCollection;
+//    @JoinTable(name = "booked_seat", joinColumns = {
+//        @JoinColumn(name = "bookingid", referencedColumnName = "booking_id")}, inverseJoinColumns = {
+//        @JoinColumn(name = "bookingseat_id", referencedColumnName = "seat_id")})
+//    @ManyToMany
+//    private Collection<Seat> seatCollection;
     @JoinColumn(name = "show_id", referencedColumnName = "show_id")
     @ManyToOne(optional = false)
     private Showmovie showId;
@@ -180,13 +180,13 @@ public class Booking implements Serializable {
         this.status = status;
     }
 
-    public Collection<Seat> getSeatCollection() {
-        return seatCollection;
-    }
-
-    public void setSeatCollection(Collection<Seat> seatCollection) {
-        this.seatCollection = seatCollection;
-    }
+//    public Collection<Seat> getSeatCollection() {
+//        return seatCollection;
+//    }
+//
+//    public void setSeatCollection(Collection<Seat> seatCollection) {
+//        this.seatCollection = seatCollection;
+//    }
 
     public Showmovie getShowId() {
         return showId;
@@ -244,7 +244,7 @@ public class Booking implements Serializable {
         this.updatedAt = now;
 
         if (this.bookingStatus == null || this.bookingStatus.isEmpty()) {
-            this.bookingStatus = "Confirmed"; // default when booking is created
+            this.bookingStatus = "PENDING_PAYMENT"; // default when booking is created
         }
         if (this.status == null || this.status.isEmpty()) {
             this.status = "active"; // default status

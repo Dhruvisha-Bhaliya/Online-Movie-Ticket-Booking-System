@@ -24,14 +24,9 @@ public class BookingBean implements BookingBeanLocal {
 
     @Override
     public void createBooking(Booking booking) {
-        try {
-            em.persist(booking);
-        } catch (ConstraintViolationException e) {
-            for (ConstraintViolation<?> v : e.getConstraintViolations()) {
-                System.out.println("VALIDATION ERROR: " + v.getPropertyPath() + " - " + v.getMessage());
-            }
-            throw e;
-        }
+        em.persist(booking);
+        em.flush();
+
     }
 
     @Override
@@ -93,6 +88,5 @@ public class BookingBean implements BookingBeanLocal {
                 .getResultList();
     }
 
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
+   
 }

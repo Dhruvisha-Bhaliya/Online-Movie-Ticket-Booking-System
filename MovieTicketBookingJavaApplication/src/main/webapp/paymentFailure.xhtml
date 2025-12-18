@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+    
+    <h:head>
+        <title>Payment Failed</title>
+        <style>
+            body {
+                font-family: "Roboto", Arial, sans-serif;
+                background-color: #f7f7f7; 
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+            .main-content {
+                width: 100%;
+                max-width: 900px; 
+                background-color: #ffffff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                min-height: 100vh;
+                margin: auto;
+                border-radius:10px;
+            }
+            .failure-container {
+                text-align: center;
+                padding: 50px 20px;
+            }
+            .failure-icon {
+                color: #f84464;
+                font-size: 80px;
+                margin-bottom: 20px;
+            }
+            .failure-container h2 {
+                color: #f84464;
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            .failure-container p {
+                color: #666;
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+            .retry-btn {
+                background: #1f1f1f;
+                color: white;
+                padding: 15px 30px;
+                font-size: 16px;
+                border-radius: 5px;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 10px;
+                margin-right: 10px;
+            }
+            .cancel-btn {
+                background: #ccc;
+                color: #1f1f1f;
+                padding: 15px 30px;
+                font-size: 16px;
+                border-radius: 5px;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 10px;
+            }
+        </style>
+    </h:head>
+    
+    <h:body>
+        <div class="main-content">
+            <div class="failure-container">
+                <div class="failure-icon">&#x2716;</div>
+                <h2>Payment Failed or Cancelled</h2>
+                <p>Your transaction could not be completed. Please try again or check your payment details.</p>
+                
+                <p>Order ID: <h:outputText value="#{cashfreePaymentController.orderId}"/></p>
+                
+                <h:link outcome="confirmBooking.xhtml" styleClass="retry-btn">Try Again</h:link>
+                <h:link outcome="index.xhtml" styleClass="cancel-btn">Back to Home</h:link>
+            </div>
+        </div>
+    </h:body>
+</html>

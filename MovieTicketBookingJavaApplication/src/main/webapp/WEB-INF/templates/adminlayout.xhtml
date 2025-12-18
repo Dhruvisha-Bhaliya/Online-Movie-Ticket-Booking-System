@@ -28,7 +28,7 @@
                         <i class="fa fa-tachometer-alt icon"></i><span>Dashboard</span>
                     </h:link>
 
-                    <h:link outcome="/admin/add_movie" styleClass="list-group-item">
+                    <h:link outcome="/admin/admin_movies" styleClass="list-group-item">
                         <i class="fa fa-film icon"></i><span>Manage Movies</span>
                     </h:link>
 
@@ -44,14 +44,15 @@
                         <i class="fa fa-users icon"></i><span>Manage Shows</span>
                     </h:link>
 
-                    <h:link outcome="/admin/admin_screens" styleClass="list-group-item">
+                    <h:link outcome="/admin/manage_roles" styleClass="list-group-item">
                         <i class="fa fa-user-shield icon"></i><span>Manage Roles</span>
                     </h:link>
-                    <h:link outcome="/superadmin/superdashboard" styleClass="list-group-item">
+                    <h:link outcome="/admin/add_user" styleClass="list-group-item">
                         <i class="fa fa-user-plus icon"></i><span>Add User</span>
                     </h:link>
-
-
+                    <h:link outcome="/admin/admin_seatCategory" styleClass="list-group-item">
+                        <i class="fa-solid fa-chair"></i><span>Manage Seat Categories</span>
+                    </h:link>
                 </nav>
             </aside>
 
@@ -72,7 +73,7 @@
                         Welcome, #{userAuthBean.username}
 
                         <h:form style="display:inline;">
-                            <h:commandLink action="#{userAuthBean.logout}" styleClass="logout-btn">
+                            <h:commandLink action="#{adminRoleUserBean.logout}" styleClass="logout-btn">
                                 <i class="fa fa-sign-out-alt"></i> Logout
                             </h:commandLink>
                         </h:form>

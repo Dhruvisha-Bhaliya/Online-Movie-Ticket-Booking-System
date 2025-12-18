@@ -4,6 +4,8 @@
  */
 package user_bean;
 
+import entity.Booking;
+import entity.Seat;
 import jakarta.ejb.Local;
 import java.util.List;
 
@@ -13,6 +15,10 @@ import java.util.List;
  */
 @Local
 public interface BookingHelperBeanLocal {
+
     List<Long> findBookedSeatIdsByShow(Long showId);
+
     List<entity.Seat> findAllSeatsByScreenId(Long screenId);
+
+    void createBookingWithSeats(Booking booking, List<Seat> seats);
 }

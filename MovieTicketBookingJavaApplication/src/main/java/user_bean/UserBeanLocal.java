@@ -15,4 +15,5 @@ import jakarta.ejb.Local;
 public interface UserBeanLocal {
     User findUser(Object userId);
     void updateUser(User userId);
+    User findByUsername(String username);
 }

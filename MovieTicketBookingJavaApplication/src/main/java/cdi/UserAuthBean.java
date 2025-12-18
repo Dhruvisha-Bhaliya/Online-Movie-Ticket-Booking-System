@@ -14,6 +14,7 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import java.io.Serializable;
+import java.util.Date;
 import util.PasswordUtil;
 
 /**
@@ -71,11 +72,11 @@ public class UserAuthBean implements Serializable {
                 case 1:
                     return "/admin/Admin_panel.xhtml?faces-redirect=true";
                 case 2:
-                    return "/admin/dashboard.xhtml?faces-redirect=true";
+                    return "/ad_min/add_min_panel.xhtml?faces-redirect=true";
                 case 3:
-                    return "/manager/dashboard.xhtml?faces-redirect=true";
+                    return "/manager/manager_panel.xhtml?faces-redirect=true";
                 case 4:
-                    return "/staff/dashboard.xhtml?faces-redirect=true";
+                    return "/staff/staff_panel.xhtml?faces-redirect=true";
             }
         }
         User user = userService.login(email, password);
@@ -94,10 +95,22 @@ public class UserAuthBean implements Serializable {
     }
 
     public String changePassword() {
+
         if (newPassword == null || confirmPassword == null || !newPassword.equals(confirmPassword)) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Passwords do not match!", null));
             return null;
+        }
+
+        Admin admin = adminService.findAdminByEmail(email);
+        if (admin != null) {
+            admin.setPassword(PasswordUtil.hashPassword(newPassword));
+            admin.setUpdatedAt(new Date());
+
+            adminService.updateAdmin(admin);  // create this method
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage("Admin password updated successfully!"));
+            return "login.xhtml?faces-redirect=true";
         }
 
         boolean ok = userService.updatePassword(email, newPassword);
@@ -174,6 +187,30 @@ public class UserAuthBean implements Serializable {
 
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
+    }
+
+    public AllAdminLoginLocal getAdminService() {
+        return adminService;
+    }
+
+    public void setAdminService(AllAdminLoginLocal adminService) {
+        this.adminService = adminService;
+    }
+
+    public Admin getLoggedAdmin() {
+        return loggedAdmin;
+    }
+
+    public void setLoggedAdmin(Admin loggedAdmin) {
+        this.loggedAdmin = loggedAdmin;
+    }
+
+    public User getLoggedUser() {
+        return loggedUser;
+    }
+
+    public void setLoggedUser(User loggedUser) {
+        this.loggedUser = loggedUser;
     }
 
 }

@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+    
+    <h:head>
+        <title>Booking Confirmed!</title>
+        <style>
+            body {
+                font-family: "Roboto", Arial, sans-serif;
+                background-color: #f7f7f7; 
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+            .main-content {
+                width: 100%;
+                max-width: 900px; 
+                background-color: #ffffff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                min-height: 100vh;
+                margin: auto;
+                border-radius:10px;
+            }
+            .success-container {
+                text-align: center;
+                padding: 50px 20px;
+            }
+            .success-icon {
+                color: #4CAF50;
+                font-size: 80px;
+                margin-bottom: 20px;
+            }
+            .success-container h2 {
+                color: #4CAF50;
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            .success-container p {
+                color: #666;
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+            .booking-details-box {
+                border: 1px solid #eee;
+                padding: 20px;
+                margin: 20px auto;
+                max-width: 400px;
+                text-align: left;
+                border-radius: 5px;
+                background-color: #fafafa;
+            }
+            .booking-details-box strong {
+                font-weight: 600;
+                color: #1f1f1f;
+            }
+            .view-booking-btn {
+                background: #f84464;
+                color: white;
+                padding: 15px 30px;
+                font-size: 16px;
+                border-radius: 5px;
+                text-decoration: none;
+                display: inline-block;
+                margin-top: 10px;
+            }
+        </style>
+    </h:head>
+    
+    <h:body>
+        <div class="main-content">
+            <div class="success-container">
+                <div class="success-icon">&#x2714;</div>
+                <h2>Booking Confirmed!</h2>
+                <p>Your transaction was successful. You will receive an e-ticket shortly.</p>
+                
+                <div class="booking-details-box">
+                    <p><strong>Order ID:</strong> <h:outputText value="#{cashfreePaymentController.orderId}"/></p>
+                    <p><strong>Total Paid:</strong> ₹<h:outputText value="#{cashfreePaymentController.amount}"/></p>
+                    <p><strong>Movie:</strong> <h:outputText value="#{movieBookingController.selectedMovie.movieTitle}"/></p>
+                </div>
+                
+                <h:link outcome="dashboard.xhtml" styleClass="view-booking-btn">View My Bookings</h:link>
+            </div>
+        </div>
+    </h:body>
+</html>

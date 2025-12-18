@@ -1,14 +1,17 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html"
-      xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets"
-      >
+<ui:composition template="/templates/mainLayout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                >
+    <ui:define name="title">#{movieBookingController.selectedMovie.movieTitle} - Select Show</ui:define>
+    <ui:define name="head">
 
-    <h:head>
-        <title>#{movieBookingController.selectedMovie.movieTitle} - Select Show</title>
         <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&amp;display=swap" rel="stylesheet" />
+
+
         <style>
             body {
                 font-family: 'Roboto', sans-serif;
@@ -110,7 +113,7 @@
             .showtime-btn {
                 text-decoration: none;
                 padding: 8px 12px;
-                border: 1px solid #4CAF50; 
+                border: 1px solid #4CAF50;
                 color: #4CAF50;
                 border-radius: 4px;
                 font-size: 14px;
@@ -118,7 +121,7 @@
                 line-height: 1.2;
                 transition: background-color 0.2s;
                 position: relative;
-                display: inline-block; 
+                display: inline-block;
             }
             .showtime-btn:hover {
                 background-color: #e8f5e9;
@@ -137,9 +140,9 @@
                 display: block;
             }
 
-          
+
             .modal {
-                display: none; 
+                display: none;
                 position: fixed;
                 z-index: 1000;
                 left: 0;
@@ -151,7 +154,7 @@
             }
             .modal-content {
                 background-color: #fefefe;
-                margin: 10vh auto; 
+                margin: 10vh auto;
                 padding: 30px;
                 border-radius: 8px;
                 width: 90%;
@@ -178,7 +181,7 @@
             .seat-selector-radio {
                 margin: 20px auto;
                 display: inline-flex;
-                flex-wrap: wrap; 
+                flex-wrap: wrap;
                 justify-content: center;
                 gap: 10px;
             }
@@ -187,12 +190,12 @@
             }
             .seat-selector-radio label {
                 display: block;
-                width: 25px; 
-                height: 25px; 
+                width: 25px;
+                height: 25px;
                 padding: 5px;
                 border: 1px solid #ddd;
                 border-radius: 50%;
-                line-height: 25px; 
+                line-height: 25px;
                 text-align: center;
                 cursor: pointer;
                 font-weight: 500;
@@ -213,7 +216,7 @@
                 margin: 25px 0 10px 0;
                 padding-top: 15px;
                 border-top: 1px solid #eee;
-                display: flex; 
+                display: flex;
                 justify-content: space-around;
             }
             .price-category {
@@ -226,7 +229,7 @@
             }
             .price-category .status {
                 font-size: 0.8em;
-                color: #4CAF50; 
+                color: #4CAF50;
             }
             .price-category .status.low {
                 color: #FF9800;
@@ -255,9 +258,10 @@
                 opacity: 0.9;
             }
         </style>
-    </h:head>
-    <h:body>
+    </ui:define>
 
+
+    <ui:define name="content">
         <div class="main-content">
             <h:messages globalOnly="true" style="color:red;"/>
 
@@ -412,19 +416,18 @@
 
                     <h:inputHidden id="numSeatsValue" value="#{movieBookingController.numberOfSeats}" />
 
-                    <div class="base-price-display">
-                        Base Price: ₹<h:outputText value="#{movieBookingController.selectedShow.basePrice}" />
-                    </div>
 
                     <h:commandButton action="#{movieBookingController.proceedToSeatLayout()}" 
                                      value="Select Seats" 
                                      styleClass="select-seats-button" />
 
                 </h:form>
-                <button onclick="document.getElementById('seatCountModal').style.display = 'none';" style="margin-top: 10px;">Cancel</button>
+                <!--                <button onclick="document.getElementById('seatCountModal').style.display = 'none';" style="margin-top: 10px;">Cancel</button>-->
             </div>
         </div>
+    </ui:define>
 
+    <ui:define name="scripts">
         <script type="text/javascript">
 
             function updateSeatImage(seatCount) {
@@ -451,7 +454,8 @@
 
             }
         </script>
-    </h:body>
+    </ui:define>
 
 
-</html>
+
+</ui:composition>

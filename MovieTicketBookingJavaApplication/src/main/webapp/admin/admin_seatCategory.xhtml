@@ -163,60 +163,7 @@
                     <f:facet name="header"><h:outputText value="Row Range" /></f:facet>
                     <h:outputText value="#{category.rowStart} - #{category.rowEnd}" />
                 </h:column>
-                <h:column>
-                    <f:facet name="header"><h:outputText value="Status" /></f:facet>
-                    <h:outputText value="#{category.status}" />
-                </h:column>
-                <h:column>
-                    <f:facet name="header"><h:outputText value="Actions" /></f:facet>
-                    <h:commandLink value="Edit" class="button edit-button" onclick="PF('editDialog').show();">
-                        <f:setPropertyActionListener value="#{category}" target="#{seatCategoryController.selectedCategory}" />
-                    </h:commandLink>
-                </h:column>
             </h:dataTable>
-
-            <!-- Placeholder Dialog/Form for Editing and Deleting -->
-            <h:form id="editDeleteForm" rendered="#{seatCategoryController.selectedCategory != null}" class="form-panel" style="margin-top: 30px;">
-                <h3>Edit/Delete Category ID: #{seatCategoryController.selectedCategory.categoryId}</h3>
-
-                <h:panelGrid columns="2" columnClasses="label, input" styleClass="form-grid">
-
-                    <h:outputLabel value="Screen Name:" />
-                    <h:outputText value="#{seatCategoryController.selectedCategory.screenId.screenName}" />
-
-                    <h:outputLabel value="Category Name:" for="editName"/>
-                    <h:inputText id="editName" value="#{seatCategoryController.selectedCategory.categoryName}" required="true" />
-
-                    <h:outputLabel value="Price (₹):" for="editPrice"/>
-                    <h:inputText id="editPrice" value="#{seatCategoryController.selectedCategory.price}" required="true">
-                        <f:convertNumber pattern="#0.00"/>
-                    </h:inputText>
-
-                    <h:outputLabel value="Start Row (e.g., A):" for="editStartRow"/>
-                    <h:inputText id="editStartRow" value="#{seatCategoryController.selectedCategory.rowStart}" required="true" maxlength="1"/>
-
-                    <h:outputLabel value="End Row (e.g., F):" for="editEndRow"/>
-                    <h:inputText id="editEndRow" value="#{seatCategoryController.selectedCategory.rowEnd}" required="true" maxlength="1"/>
-
-                    <h:outputLabel value="Status:" for="editStatus"/>
-                    <h:selectOneMenu id="editStatus" value="#{seatCategoryController.selectedCategory.status}">
-                        <f:selectItem itemLabel="Active" itemValue="active"/>
-                        <f:selectItem itemLabel="Inactive" itemValue="inactive"/>
-                    </h:selectOneMenu>
-                </h:panelGrid>
-
-                <div style="margin-top: 20px;">
-                    <h:commandButton value="Update Category" action="#{seatCategoryController.updateCategory}" class="button save-button">
-                        <f:ajax execute="@form" render=":categoryTable :editDeleteForm" />
-                    </h:commandButton>
-
-                    <h:commandButton value="Delete Category" action="#{seatCategoryController.deleteCategory}" class="button delete-button"
-                                     onclick="return confirm('Are you sure you want to delete this category?');">
-                        <f:ajax execute="@this" render=":categoryTable editDeleteForm" />
-                    </h:commandButton>
-                </div>
-            </h:form>
-
         </div>
     </h:body>
 </html>

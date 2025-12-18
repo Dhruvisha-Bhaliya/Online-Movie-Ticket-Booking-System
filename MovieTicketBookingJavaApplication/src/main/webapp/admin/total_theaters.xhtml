@@ -1,0 +1,114 @@
+<ui:composition
+    template="/WEB-INF/templates/adminlayout.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="jakarta.faces.html"
+    xmlns:f="jakarta.faces.core"
+    xmlns:ui="jakarta.faces.facelets">
+
+    <ui:define name="title">Manage Theaters</ui:define>
+
+    <ui:define name="content">
+
+        <div class="page-container">
+
+            <!-- PAGE TITLE -->
+            <h2 class="page-title">Theater Management</h2>
+            <!-- TABLE CARD -->
+            <div class="card">
+                <h3 class="card-title">Existing Theaters</h3>
+
+                <h:dataTable value="#{adminTheaterController.theaterList}"
+                             var="t"
+                             styleClass="theater-table"
+                             headerClass="theater-header"
+                             rowClasses="row-even,row-odd">
+
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+                        <span class="id-badge">#{t.theaterId}</span>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Theater Name</f:facet>
+                        <strong class="theater-name">#{t.theaterName}</strong>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">City</f:facet>
+                        <span class="city-text">#{t.city}</span>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Address</f:facet>
+                        <span class="address-text">#{t.address}</span>
+                    </h:column>
+
+                </h:dataTable>
+            </div>
+        </div>
+        <style>
+            .theater-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #ffffff;
+                border-radius: 10px;
+                overflow: hidden;
+                font-size: 14px;
+            }
+
+            .theater-header th {
+                background: #EEF2FF;
+                color: #1F2937;
+                padding: 12px;
+                font-weight: 600;
+                text-align: left;
+                border-bottom: 2px solid #E5E7EB;
+            }
+
+            .theater-table td {
+                padding: 12px;
+                border-bottom: 1px solid #E5E7EB;
+                vertical-align: top;
+            }
+
+            .row-even {
+                background: #FFFFFF;
+            }
+
+            .row-odd {
+                background: #F9FAFB;
+            }
+
+            .theater-table tr:hover {
+                background: #EEF2FF;
+                transition: background 0.25s ease;
+            }
+
+            /* Column styling */
+            .id-badge {
+                background: #E0E7FF;
+                color: #3730A3;
+                padding: 4px 10px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .theater-name {
+                color: #111827;
+                font-weight: 600;
+            }
+
+            .city-text {
+                color: #374151;
+                font-weight: 500;
+            }
+
+            .address-text {
+                color: #6B7280;
+                line-height: 1.4;
+                word-wrap: break-word;
+            }
+        </style>
+    </ui:define>
+</ui:composition>

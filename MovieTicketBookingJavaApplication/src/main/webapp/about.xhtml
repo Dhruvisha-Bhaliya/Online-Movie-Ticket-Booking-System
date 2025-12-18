@@ -1,12 +1,126 @@
-<?xml version='1.0' encoding='UTF-8' ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="jakarta.faces.html">
-    <h:head>
-        <title>Facelet Title</title>
-    </h:head>
-    <h:body>
-        <h1>About Page</h1>
-    <p>This is a dummy About page.</p>
-    </h:body>
-</html>
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="jakarta.faces.html"
+        xmlns:ui="jakarta.faces.facelets"
+        template="/templates/mainLayout.xhtml">
+
+    <!-- Page Title -->
+    <ui:define name="title">
+        About Us | Online Movie Ticket Booking
+    </ui:define>
+
+    <!-- Page Content -->
+    <ui:define name="content">
+
+        <style>
+            .about-wrapper {
+                max-width: 1000px;
+                margin: 40px auto;
+                background: #ffffff;
+                padding: 45px;
+                border-radius: 14px;
+                box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+                font-family: "Segoe UI", Arial, sans-serif;
+            }
+
+            .about-wrapper h1 {
+                text-align: center;
+                color: #1f2937;
+                margin-bottom: 20px;
+                font-size: 32px;
+            }
+
+            .about-wrapper p {
+                color: #555;
+                font-size: 16px;
+                line-height: 1.8;
+                text-align: justify;
+            }
+
+            .highlight {
+                color: #e11d48;
+                font-weight: 600;
+            }
+
+            .feature-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+                margin-top: 35px;
+            }
+
+            .feature-box {
+                background: #f9fafb;
+                border-radius: 12px;
+                padding: 25px;
+                text-align: center;
+                transition: transform 0.2s ease;
+            }
+
+            .feature-box:hover {
+                transform: translateY(-5px);
+            }
+
+            .feature-box h3 {
+                color: #111827;
+                margin-bottom: 8px;
+            }
+
+            .feature-box span {
+                font-size: 14px;
+                color: #6b7280;
+            }
+        </style>
+
+        <div class="about-wrapper">
+
+            <h1>About Our Movie Ticket Booking System</h1>
+
+            <p>
+                Our <span class="highlight">Online Movie Ticket Booking System</span>
+                is a modern web-based platform that allows users to browse movies,
+                check show timings, select seats, and book tickets easily from
+                anywhere. The system eliminates long queues and provides a smooth,
+                hassle-free cinema booking experience.
+            </p>
+
+            <p>
+                Designed with performance, security, and usability in mind, this
+                application supports multiple user roles such as customers, staff,
+                and administrators. It ensures real-time seat availability,
+                secure payments, and efficient theatre management.
+            </p>
+
+            <div class="feature-grid">
+
+                <div class="feature-box">
+                    <h3>🎟 Easy Booking</h3>
+                    <span>Book movie tickets in just a few clicks</span>
+                </div>
+
+                <div class="feature-box">
+                    <h3>💺 Seat Selection</h3>
+                    <span>Real-time seat layout and availability</span>
+                </div>
+
+                <div class="feature-box">
+                    <h3>🔐 Secure System</h3>
+                    <span>Safe login and protected transactions</span>
+                </div>
+
+                <div class="feature-box">
+                    <h3>📱 User Friendly</h3>
+                    <span>Clean and responsive interface</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </ui:define>
+
+</ui:composition>

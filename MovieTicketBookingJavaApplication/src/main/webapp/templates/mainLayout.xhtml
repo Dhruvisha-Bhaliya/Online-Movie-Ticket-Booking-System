@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="jakarta.faces.core">
+
+    <h:head>
+        <title>
+            <ui:insert name="title">Movie Ticket Booking System</ui:insert>
+        </title>
+
+        <h:outputStylesheet library="css" name="styles.css" />
+
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+        <meta http-equiv="Pragma" content="no-cache"/>
+        <meta http-equiv="Expires" content="0"/>
+
+        <ui:insert name="head"/>
+    </h:head>
+
+    <h:body>
+
+        <!-- ✅ YOUR NAVBAR (copied from your main page) -->
+        <div class="navbar">
+            <div class="navbar-left">
+                <div class="navbar-title">🎬 MovieBooker</div>
+
+                <h:link outcome="/index.xhtml" styleClass="navbar-link">
+                    <h:outputText value="Home" />
+                </h:link>
+
+                <h:link outcome="/movie.xhtml" styleClass="navbar-link">
+                    <h:outputText value="Movie" />
+                </h:link>
+
+                <h:link outcome="/about.xhtml" styleClass="navbar-link">
+                    <h:outputText value="About" />
+                </h:link>
+            </div>
+
+            <div class="navbar-right">
+                <h:form id="searchForm">
+                    <h:inputText id="searchBox" styleClass="search-box"
+                                 value="#{searchController.searchQuery}"
+                                 onkeyup="jsf.ajax.request(this, event, {execute: 'searchBox', render: 'suggestions'});" />
+
+                    <h:panelGroup id="suggestions" layout="block" styleClass="suggestion-box"
+                                  rendered="#{not empty searchController.filteredMovies}">
+                        <ui:repeat value="#{searchController.filteredMovies}" var="movie">
+                            <div class="suggestion-item"
+                                 onclick="window.location.href = 'MovieDetail.xhtml?movieId=#{movie.movieId}'">
+                                🎬 #{movie.movieTitle}
+                            </div>
+                        </ui:repeat>
+                    </h:panelGroup>
+
+                    <h:commandButton value="Search"
+                                     styleClass="search-button"
+                                     action="#{searchController.performSearch()}" />
+                </h:form>
+
+                <h:panelGroup rendered="#{not empty sessionScope.user}">
+                    <div class="user-menu">
+                        <div class="user-icon" onclick="toggleLogoutMenu()">
+                            #{sessionScope.user.username.substring(0,1).toUpperCase()}
+                        </div>
+                        <div id="logoutBox" class="logout-box" style="display:none;">
+                            <h:form id="logoutForm">
+                                <a href="#" class="logout-btn" onclick="return confirmLogout(event);">Logout</a>
+                                <h:commandButton id="realLogout"
+                                                 action="#{userAuthBean.logout}"
+                                                 style="display:none;" />
+                            </h:form>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{empty sessionScope.user}">
+                    <h:link outcome="/login.xhtml" styleClass="login-button">Login</h:link>
+                    <h:link outcome="/register.xhtml" styleClass="btn-register">Register</h:link>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <!-- ✅ PAGE CONTENT GOES HERE -->
+        <div class="page-content">
+            <ui:insert name="content"/>
+        </div>
+
+        <h:outputScript library="js" name="script.js" />
+        <ui:insert name="scripts"/>
+
+    </h:body>
+</html>
